@@ -1,0 +1,116 @@
+/* Secciones de método y configuración de la guía del entorno. */
+.guide-evaluation,
+.guide-configuration {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: 1.5rem;
+}
+.guide-evaluation h2,
+.guide-configuration h2 {
+  font-size: 1.6rem;
+}
+.pipeline {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+  counter-reset: step;
+}
+.pipeline li {
+  position: relative;
+  padding: 1.1rem 1.15rem 1.2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-subtle);
+  background: linear-gradient(160deg, var(--surface) 55%, var(--brand-soft));
+  box-shadow: var(--shadow-sm);
+}
+.pipeline li:nth-child(4),
+.pipeline li:nth-child(5) {
+  background: linear-gradient(160deg, var(--surface) 55%, color-mix(in srgb, var(--accent-2) 14%, transparent));
+}
+.pipeline h3 {
+  margin: 0.75rem 0 0.4rem;
+  font-size: 1rem;
+}
+.pipeline p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.pipeline-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 12px;
+  background: var(--brand);
+  color: var(--on-brand);
+  box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--brand) 70%, transparent);
+}
+.guide-callout {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius);
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-border);
+  color: var(--ink);
+}
+.guide-callout svg {
+  flex: none;
+  color: var(--warn);
+  margin-top: 0.15rem;
+}
+.guide-callout p {
+  margin: 0;
+}
+.command-list,
+.config-grid {
+  margin: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.command-list {
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+}
+.command-list > div,
+.config-grid > div {
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+}
+.command-list dt,
+.config-grid dt {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+.command-list dd,
+.config-grid dd {
+  margin: 0;
+}
+.command-list code {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  background: var(--tooltip-bg);
+  color: #e8f3f5;
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.config-grid {
+  grid-template-columns: repeat(auto-fit, minmax(max(14rem, 23%), 1fr));
+}
+.config-grid dd {
+  font-weight: 600;
+  color: var(--ink);
+}

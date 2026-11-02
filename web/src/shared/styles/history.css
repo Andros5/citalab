@@ -1,0 +1,166 @@
+.history-filters {
+  margin-bottom: 1.5rem;
+}
+.history-filter-heading,
+.history-filter-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.history-filter-heading {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.history-filter-heading h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+.history-filter-heading svg {
+  color: var(--brand);
+}
+.history-filter-heading > span {
+  font-size: 0.8125rem;
+}
+.history-filter-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: end;
+}
+.history-filter-fields label {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.history-filter-fields select,
+.history-filter-fields .search {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  background: var(--canvas);
+}
+.history-filter-fields .search input {
+  width: 100%;
+  min-width: 0;
+}
+.history-summary {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.history-results.panel {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+.history-results td {
+  padding-block: 1.35rem;
+}
+.history-results td[data-label="Perfil"] {
+  min-width: 9rem;
+}
+.history-results td[data-label="Actividad"],
+.history-results td[data-label="Creación"] {
+  min-width: 10rem;
+}
+.history-results .table-title {
+  min-width: 13rem;
+  max-width: 26ch;
+  overflow-wrap: anywhere;
+}
+.history-id {
+  color: var(--muted);
+  white-space: nowrap;
+  font-size: 0.75rem;
+  background: none;
+  padding: 0;
+}
+.history-results tbody tr:hover {
+  background: var(--surface-2);
+}
+.history-results .actions > .icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.history-results td[data-label="Consumo"] {
+  min-width: 9rem;
+}
+.history-load-more {
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  border-top: 1px solid var(--border);
+}
+.history-footnote {
+  font-size: 0.8125rem;
+  margin-block: 1rem 2rem;
+}
+@media (min-width: 48rem) {
+  .history-filter-fields {
+    grid-template-columns: minmax(12rem, 2fr) repeat(2, minmax(14rem, 1fr)) auto;
+  }
+  /* Keep this history as a real table on tablets too; scroll horizontally
+     within its panel rather than squeezing columns or widening the page. */
+  .history-results .responsive-table table {
+    display: table;
+  }
+  .history-results .responsive-table tbody {
+    display: table-row-group;
+  }
+  .history-results .responsive-table tr {
+    display: table-row;
+  }
+  .history-results .responsive-table td {
+    display: table-cell;
+    width: auto;
+    padding: 1.35rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-results .responsive-table thead {
+    position: static;
+    display: table-header-group;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+  .history-results .responsive-table td[data-label]::before {
+    display: none;
+  }
+  .history-results th {
+    padding: 1rem;
+  }
+  .history-results .responsive-table td .actions {
+    flex-wrap: nowrap;
+    min-width: max-content;
+  }
+  .history-results th:last-child,
+  .history-results td:last-child {
+    position: sticky;
+    right: 0;
+    background: var(--surface);
+    box-shadow: -1px 0 var(--border);
+    z-index: 1;
+  }
+  .history-results th:last-child {
+    background: var(--surface-2);
+  }
+}
+@media (min-width: 48rem) and (max-width: 76rem) {
+  .history-filter-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

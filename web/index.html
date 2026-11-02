@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0e7f94" />
+    <meta
+      name="description"
+      content="CitaLab: laboratorio académico local de gestión de citas y auditoría de agentes LLM. Solo datos sintéticos."
+    />
+    <title>CitaLab · Laboratorio de agentes</title>
+    <script>
+      // Tema antes del primer pintado: preferencia guardada o la del sistema.
+      (function () {
+        var theme;
+        try {
+          theme = localStorage.getItem("citalab.theme");
+        } catch (e) {}
+        if (theme !== "dark" && theme !== "light")
+          theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

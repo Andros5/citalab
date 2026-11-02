@@ -1,0 +1,135 @@
+% !TEX root = main.tex
+\chapter{Estado del arte y posición del trabajo}
+\label{chap:estado-arte}
+
+\section{Método y alcance de la revisión}
+
+La revisión se centra en trabajos sobre agentes basados en modelos de lenguaje, personalización conversacional y gestión administrativa sanitaria. Se han considerado tanto sistemas capaces de consultar o modificar información mediante herramientas como estudios que permiten analizar su fiabilidad, seguridad y evaluación. El objetivo es identificar qué aspectos del problema se han abordado y qué preguntas siguen abiertas para la comparación propuesta en este TFM.
+
+La búsqueda principal se cerró el 11 de agosto de 2026 y se amplió mediante una revisión crítica el 5 de septiembre. Se priorizaron publicaciones de 2024 a 2026, además de algunos antecedentes necesarios para interpretar los métodos actuales. La selección tuvo en cuenta la proximidad a la gestión de citas, el uso de agentes y herramientas, la personalización y la disponibilidad de resultados evaluables.
+
+Se escogieron cinco trabajos especialmente relacionados con CitaLab y se completó su análisis con investigaciones sobre memoria, coordinación entre agentes, seguridad y simulación de conversaciones. No se trata de una revisión sistemática ni pretende abarcar todas las publicaciones del área. Tampoco se establece una clasificación de rendimiento entre los sistemas: cada estudio utiliza sus propios datos, modelos, tareas y criterios de éxito.
+
+\section{Cinco trabajos directamente relacionados}
+
+La Tabla~\ref{tab:trabajos-relacionados} reúne los antecedentes más próximos a las funciones y decisiones de diseño estudiadas. Algunos se centran en la interacción con recursos FHIR, mientras que otros abordan la asignación de citas o la automatización conversacional. La comparación permite situar las aportaciones de cada uno sin considerar equivalentes sus arquitecturas ni sus resultados.
+
+\begin{landscape}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{L{0.12\linewidth}L{0.14\linewidth}L{0.16\linewidth}L{0.06\linewidth}L{0.14\linewidth}L{0.30\linewidth}}
+\caption{Trabajos relacionados y diferencias respecto al alcance de CitaLab.}\label{tab:trabajos-relacionados}\\
+\toprule
+\textbf{Trabajo} & \textbf{Gestión} & \textbf{Arquitectura} & \textbf{FHIR} & \textbf{Personalización} & \textbf{Evaluación y límite principal} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Trabajo} & \textbf{Gestión} & \textbf{Arquitectura} & \textbf{FHIR} & \textbf{Personalización} & \textbf{Evaluación y límite principal} \\
+\midrule
+\endhead
+\citet{demaio2025privacy} & Consulta y actualización de historias clínicas. & Cinco agentes con separación entre acceso, interpretación y escritura. & Sí. & No estudia memoria personal longitudinal. & Operaciones sobre datos sintéticos. No evalúa una reserva conversacional completa. \\
+MedScrubCrew \citeyearpar{ruiz2025medscrubcrew} & Triaje y asignación paciente--profesional. & Agentes especializados, grafo de conocimiento y Gale--Shapley. & No. & Perfiles para el emparejamiento. & Grafo de 100 pacientes. No compara la especialización con un agente único equivalente. \\
+MedAgentBench \citeyearpar{jiang2025medagentbench} & Consultas y acciones clínicas y administrativas. & Entorno de evaluación de agentes con herramientas. & Sí. & No es su objetivo. & Verifica resultados sobre recursos sanitarios. No estudia preferencias ni gestiones completas de citas. \\
+H-AdminSim \citeyearpar{lee2026hadminsim} & Admisión, reserva, reprogramación y cancelación. & Simulación de pacientes y personal administrativo mediante agentes. & Sí. & Preferencias de los escenarios. & Hospitales sintéticos. No estudia memoria personal persistente ni una comparación M5--S1--H. \\
+CareConnect \citeyearpar{hasan2026careconnect} & Reserva, modificación, cancelación e información administrativa. & Agente único con herramientas y controles deterministas. & No. & No evalúa memoria longitudinal. & 680 escenarios sintéticos. No compara arquitecturas multiagente. \\
+\bottomrule
+\end{longtable}
+\normalsize
+\setlength{\tabcolsep}{6pt}
+\end{landscape}
+
+\subsection{Operaciones FHIR y privacidad}
+
+\citet{demaio2025privacy} proponen una arquitectura de cinco agentes para consultar y actualizar datos sanitarios mediante FHIR. El sistema diferencia el procesamiento de la petición, la recuperación de recursos, su interpretación y las operaciones de escritura. Un modelo externo interviene en la preparación de consultas, mientras que los componentes que manejan información sensible se mantienen en un entorno controlado. La versión publicada en 2025 amplía el trabajo anterior con un agente encargado de actualizar registros.
+
+La evaluación utiliza datos sintéticos y recoge resultados sobre consultas y modificaciones, incluidas pruebas de exactitud y conformidad con el esquema de los recursos. No aborda, sin embargo, el recorrido administrativo de una cita desde la solicitud hasta su confirmación, ni estudia preferencias personales conservadas entre sesiones. Su arquitectura ofrece un antecedente para separar la interpretación del lenguaje de las operaciones que requieren acceso autorizado a los datos.
+
+La importancia de verificar esas operaciones aparece también en MedAgentBench \citep{jiang2025medagentbench}. Este benchmark reúne 300 tareas distribuidas en diez categorías sobre un entorno interactivo compatible con FHIR. En el modelo con mejor resultado global, la tasa de éxito alcanza el 69,67\,\%, con diferencias entre consultas (85,33\,\%) y acciones que modifican recursos (54\,\%). Las cifras corresponden al entorno y a los modelos evaluados, pero ilustran una dificultad relevante: utilizar herramientas correctamente exige algo más que producir una respuesta plausible.
+
+En una gestión de citas, el mensaje final puede describir una reserva correcta aunque el sistema haya recibido parámetros equivocados o no haya registrado la operación. Por eso, CitaLab utiliza la agenda como fuente del resultado y comprueba por separado la respuesta conversacional y el estado de las citas.
+
+\subsection{Agentes, perfiles y asignación de citas}
+
+MedScrubCrew reúne varios elementos próximos a este TFM: agentes especializados, perfiles y asignación de citas \citep{ruiz2025medscrubcrew}. Su arquitectura combina un grafo de conocimiento con el algoritmo Gale--Shapley para relacionar pacientes y profesionales, e incorpora funciones de triaje. El estudio utiliza un grafo construido a partir de 100 pacientes y evalúa distintos modelos mediante criterios como la completitud de las tareas, la relevancia contextual y el uso correcto de herramientas.
+
+Los autores describen dificultades relacionadas con argumentos mal formados, recuperación de información y límites de contexto. Aunque el trabajo muestra una aplicación de la colaboración entre componentes, no emplea FHIR ni compara su arquitectura con un agente único provisto de capacidades equivalentes. Además, parte de sus decisiones de asignación dependen de información clínica que CitaLab no utiliza.
+
+H-AdminSim está todavía más cerca de la gestión administrativa de citas \citep{lee2026hadminsim}. El estudio construye un entorno de simulación hospitalaria donde pacientes y personal administrativo interactúan para resolver tareas de admisión, reserva, reprogramación y cancelación. Las operaciones se apoyan en recursos FHIR y las pruebas incluyen diferentes configuraciones hospitalarias, modelos y preferencias de horario o profesional.
+
+Uno de sus resultados más relevantes es la diferencia entre utilizar herramientas para gestionar la agenda y tratar de resolver sus restricciones mediante razonamiento textual. El primer enfoque obtiene resultados considerablemente mejores en los escenarios evaluados. No obstante, las preferencias forman parte de las condiciones de cada escenario, sin constituir un perfil personal que se mantenga y revise entre sesiones.
+
+También hay que distinguir qué significa \emph{multiagente} en ambos trabajos. H-AdminSim utiliza agentes para representar participantes de un proceso hospitalario. En M5, en cambio, los agentes son componentes especializados de un mismo asistente. Esta diferencia impide trasladar directamente a CitaLab los resultados obtenidos por su simulador.
+
+\subsection{Agente único con barreras de seguridad}
+
+CareConnect presenta un asistente conversacional que utiliza un agente orquestador, ocho herramientas y recuperación de información para realizar gestiones administrativas sanitarias \citep{hasan2026careconnect}. Incluye reglas deterministas para detectar determinadas situaciones de emergencia, evitar respuestas de consejo médico y comprobar las operaciones. El trabajo se publicó en las actas de ICCBI 2026.
+
+Los autores evalúan 680 escenarios sintéticos y comunican 624 gestiones completadas (91,8\,\%). También registran 3283 llamadas a herramientas correctas de 3462 (94,8\,\%) y 144 casos superados de 150 en el subconjunto de seguridad (96\,\%). Cada indicador tiene un denominador y un propósito distintos. Ninguno representa por sí solo la fiabilidad general de un despliegue sanitario.
+
+CareConnect no utiliza FHIR ni estudia preferencias personales persistentes, pero demuestra que una arquitectura con un solo agente y controles programados puede resolver tareas de citación con resultados favorables en su entorno de prueba. Esto lo convierte en un antecedente importante para S1. Una comparación con M5 solo será informativa si ambas variantes disponen de las mismas herramientas, permisos y comprobaciones de escritura.
+
+\section{Evidencia complementaria}
+
+Los cinco trabajos anteriores permiten identificar las soluciones más próximas al problema, pero no cubren por completo las dificultades de personalización, coordinación y evaluación. Para estudiar esos aspectos se han considerado publicaciones de ámbitos relacionados, cuyos métodos pueden adaptarse al caso de las citas aunque sus resultados no sean directamente comparables.
+
+La revisión de \citet{laranjo2018healthcare} ya señalaba limitaciones en la evaluación de agentes conversacionales sanitarios, especialmente en seguridad y eficacia. Aunque precede a los LLM actuales, permite situar una distinción que sigue siendo necesaria: una conversación satisfactoria no demuestra que una tarea se haya realizado correctamente.
+
+En sistemas que trabajan con historias clínicas estructuradas, EHRAgent y FHIR-AgentBench estudian distintas formas de utilizar herramientas y recuperar información \citep{shi2024ehragent,lee2026fhiragentbench}. Sus resultados muestran dificultades para interpretar tablas, localizar recursos y relacionar datos distribuidos entre estructuras FHIR. \citet{klang2026administrators} también encuentran limitaciones en la precisión de los LLM al responder directamente a consultas administrativas sobre datos tabulares, especialmente cuando aumentan las dimensiones y restricciones de la tarea. La ejecución de herramientas mejora los resultados, aunque no elimina todos los errores.
+
+MCP-FHIR propone otra forma de conectar modelos de lenguaje con recursos sanitarios y adaptar las respuestas a distintos roles, como pacientes y profesionales \citep{ehtesham2025mcpfhir}. Esa adaptación no debe confundirse con la personalización individual basada en preferencias persistentes. Las revisiones de \citet{gorenshtein2025review}, \citet{njei2026scoping} y \citet{tong2026agentic} muestran, además, la diversidad de arquitecturas y métodos de evaluación empleados en agentes sanitarios, todavía con una presencia importante de estudios realizados en simulación.
+
+\subsection{Selección, seguimiento y utilidad de las preferencias}
+
+LaMP estudia la incorporación de información del usuario a distintas tareas de personalización \citep{salemi2024lamp}. PersonaMem aborda un problema adicional: las preferencias pueden cambiar entre sesiones y el modelo debe identificar cuáles siguen siendo pertinentes \citep{jiang2025personamem}. Ambos trabajos ayudan a entender por qué conservar un historial no garantiza una respuesta adaptada a la situación actual.
+
+PrefEval evalúa la capacidad de inferir, recordar y seguir preferencias durante conversaciones con información que puede distraer al modelo \citep{zhao2025prefeval}. RPEval introduce una distinción especialmente útil: la memoria puede ser pertinente, irrelevante o entrar en conflicto con la intención de la persona \citep{feng2026rpeval}. Una preferencia habitual por las mañanas, por ejemplo, no debería desplazar una solicitud expresa de cita por la tarde. El problema no consiste en olvidar la preferencia, sino en aplicarla cuando no corresponde.
+
+También existen límites en la forma de evaluar la personalización. \citet{zhang2026recenter} encuentran diferencias entre los juicios humanos y las valoraciones generadas por LLM sobre la utilidad de utilizar determinados atributos personales. Por su parte, PRISK estudia efectos negativos como introducir información innecesaria del perfil, reducir las opciones consideradas o reforzar afirmaciones del usuario sin suficiente fundamento \citep{wang2026prisk}. Este último trabajo es una prepublicación y no analiza específicamente servicios sanitarios.
+
+Estos antecedentes llevan a distinguir tres comprobaciones en CitaLab: que la preferencia esté disponible, que corresponda utilizarla y que la respuesta la aplique correctamente. En algunos casos, respetar al usuario significa precisamente no emplear información que el sistema conserva sobre él. Las pruebas con perfiles sintéticos permiten examinar ese comportamiento, pero no medir directamente la satisfacción de pacientes reales.
+
+\subsection{Especialización, ataques y evaluación del recorrido}
+
+La literatura sobre coordinación entre agentes ofrece motivos para estudiar arquitecturas especializadas, pero también advierte de sus costes. \citet{kim2026scalingagents} comparan distintos diseños y encuentran que el resultado depende de cómo se organiza la tarea y del presupuesto de cómputo. Las tareas que admiten división pueden beneficiarse de la coordinación, mientras que otras, con dependencias secuenciales, pueden empeorar al introducir nuevas llamadas y decisiones intermedias. Otros trabajos también relativizan la ventaja de repartir el trabajo. En tareas de razonamiento, un agente único con buenas instrucciones se acerca a los resultados de una discusión entre varios agentes \citep{wang2024multiagentdiscussion}, y la ventaja de los sistemas multiagente disminuye a medida que mejoran los modelos \citep{gao2025singlemulti}.
+
+La gestión de una cita combina interpretación, consultas y operaciones cuyo orden importa. No basta con repartir esas responsabilidades para obtener una mejora. El interés experimental está en comprobar qué decisiones aporta la especialización y cuánto cuesta producirlas, manteniendo S1 como comparador con las mismas capacidades de acceso y ejecución.
+
+Los sistemas multiagente también pueden introducir errores durante la coordinación. MAST clasifica fallos relacionados con el diseño, la desalineación entre componentes y la verificación de resultados \citep{cemri2025mast}. Sus categorías ayudan a revisar las trazas y localizar la primera desviación observable, aunque el orden de los eventos no demuestra por sí solo una relación causal. AgentDojo estudia otro problema: las instrucciones maliciosas incluidas en información que un agente recibe mediante herramientas \citep{debenedetti2024agentdojo}. En CitaLab, el contenido de mensajes, perfiles y resultados no puede modificar los permisos ni las acciones que el programa autoriza.
+
+Además de comprobar decisiones internas, hay que evaluar la conversación como una secuencia de acciones. $\tau$-bench vincula la interacción entre usuario, agente y herramientas con un estado final verificable \citep{yao2024taubench}. $\tau^2$-bench amplía el enfoque a situaciones donde el usuario también realiza acciones que modifican el desarrollo de la tarea \citep{barres2025tau2}. AgentBoard propone observar el progreso por subobjetivos, diferenciándolo de la finalización efectiva \citep{ma2024agentboard}.
+
+Estos métodos resultan pertinentes para pruebas con usuarios que pueden confirmar, rechazar o corregir una propuesta. Una cita no debe considerarse reservada porque el asistente haya llegado a ofrecer un horario, ni porque el usuario simulado haya respondido afirmativamente: la operación debe estar autorizada y reflejarse en la agenda.
+
+Por último, \citet{kapoor2024agentsthatmatter} plantean la necesidad de considerar el coste y la reproducibilidad al evaluar agentes. Dos arquitecturas pueden resolver el mismo caso con diferente número de llamadas, tokens y tiempo de ejecución. Registrar estas diferencias permite interpretar sus resultados sin utilizar una puntuación única que oculte errores administrativos detrás de una buena calidad lingüística o de un consumo reducido.
+
+\subsection{Simulación del usuario y límites de la comparación}
+
+La evaluación de conversaciones completas requiere representar también el comportamiento del usuario. Los simuladores basados en agenda definen objetivos e información pendiente, dejando que las respuestas se construyan durante la interacción \citep{schatzmann2007agenda}. Los trabajos posteriores sobre simulación mediante LLM y alineación de objetivos estudian cómo mantener esa conducta dentro de un escenario establecido \citep{ni2026simulation,mehri2026goalalignment}.
+
+Los perfiles simulados permiten introducir diferencias en familiaridad con el procedimiento, forma de preguntar o necesidad de explicaciones. Sin embargo, variar esos rasgos no garantiza un comportamiento realista. \citet{wang2025usp} y \citet{nakano2025personas} investigan la consistencia y diversidad de personas simuladas, mientras que SimulatorArena contrasta su comportamiento mediante diálogos y evaluaciones humanas \citep{dou2025simulatorarena}. \citet{zhou2026sim2real} muestran además que los simuladores basados en LLM son demasiado cooperativos y valoran la conversación mejor que las personas. Estos trabajos respaldan la necesidad de revisar al simulador, no solo al asistente que se está probando.
+
+clem:todd aporta un marco para comparar diálogos orientados a tareas bajo condiciones compartidas \citep{kranti2025clemtodd}. En CitaLab, M5, S1 y H reciben el mismo escenario inicial y disponen de las mismas herramientas y restricciones, pero no tienen por qué producir conversaciones idénticas. El simulador debe responder a lo que observa sin utilizar información que su ficha no le permite conocer. Por ello, su fidelidad al escenario y la calidad de la gestión realizada por el asistente se valoran por separado.
+
+\section{Carencias y posición del trabajo}
+
+La revisión confirma que existen sistemas de citas con agentes, perfiles y herramientas sobre datos sanitarios. También hay propuestas que incorporan controles deterministas y entornos para evaluar operaciones FHIR. No se plantea, por tanto, que CitaLab introduzca por primera vez estos elementos.
+
+La cuestión pendiente es cómo se comportan cuando se combinan en un asistente administrativo con preferencias persistentes y controles compartidos entre distintas arquitecturas. En los trabajos revisados se identifican cinco aspectos que justifican la comparación:
+
+\begin{enumerate}
+\item \textbf{Comparación de arquitecturas.} No se encontró una evaluación directa de cinco responsabilidades LLM especializadas, un agente único y un flujo híbrido sobre las mismas gestiones de citas, con herramientas, permisos y condiciones de prueba equivalentes.
+\item \textbf{Preferencias entre sesiones.} Los antecedentes incluyen perfiles personales o preferencias de escenario, pero no analizan conjuntamente su procedencia, vigencia, finalidad, pertinencia y control por parte del usuario durante las operaciones administrativas estudiadas.
+\item \textbf{Resultado efectivo de la gestión.} Los benchmarks muestran dificultades al ejecutar acciones sobre datos estructurados. En CitaLab interesa comprobar la secuencia completa, desde la interpretación de la solicitud hasta la confirmación y el estado final de la cita.
+\item \textbf{Controles verificables.} Aunque existen mecanismos de seguridad y privacidad en trabajos anteriores, la revisión no encontró una evaluación conjunta, para este flujo, de autorización, minimización, límites clínicos y trazabilidad conforme a los requisitos considerados en el contexto europeo.
+\item \textbf{Coste de la especialización.} Los resultados de otros dominios no permiten anticipar si el trabajo distribuido entre agentes compensa el consumo y los errores de coordinación que puede introducir en una gestión de citas.
+\end{enumerate}
+
+El prototipo estudia estas cuestiones mediante agendas sintéticas y un subconjunto de recursos FHIR R4, con acceso selectivo a preferencias y comprobaciones deterministas de las operaciones. M5 distribuye cinco responsabilidades LLM. S1 reúne la interpretación y selección de acciones en un solo agente. H utiliza un flujo principalmente definido en código.
+
+La comparación M5--S1 permite estudiar el efecto de la especialización cuando se conservan los controles y herramientas. H aporta una referencia adicional, aunque modifica también el grado de intervención del modelo y no constituye una ablación aislada de los cinco agentes. Los resultados deberán determinar si la distribución de responsabilidades produce mejoras observables y qué coste añade. Un resultado favorable a S1 o H también sería relevante para responder a la pregunta de investigación.
+
+\section{Límites de la evidencia disponible}
+
+La búsqueda es focalizada y puede haber dejado fuera publicaciones pertinentes. Su alcance temporal está definido por las revisiones realizadas, y parte de los estudios analizados procede de prepublicaciones. Las diferencias entre tareas, conjuntos de datos, modelos y métricas impiden utilizar sus resultados como una clasificación general de sistemas. Las conclusiones de este capítulo se limitan a los antecedentes examinados.
+
+CitaLab comparte la dependencia de entornos sintéticos presente en parte de esa literatura. Sus pruebas permiten observar operaciones administrativas, comportamiento conversacional y consumo bajo condiciones controladas, pero no representan una evaluación con pacientes ni una integración en el Servicio Andaluz de Salud. La comparación entre M5, S1 y H deberá interpretarse dentro de los escenarios, modelos y versiones efectivamente utilizados.

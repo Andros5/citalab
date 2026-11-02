@@ -1,0 +1,808 @@
+{
+  "schema_version": "citalab-scenarios-v3",
+  "provenance": "Corpus sintético de desarrollo: 25 familias de gestiones, contrastes de persona (UC-*) y un suplemento de casos nuevos (SUP-*). Se usó para ajustar el asistente y es distinto del corpus final independiente.",
+  "reference_time": "2026-10-05T08:00:00Z",
+  "max_user_turns": 10,
+  "repeats": [
+    "B01",
+    "Q01",
+    "R01",
+    "C01",
+    "M01"
+  ],
+  "counterfactuals": [
+    {
+      "id": "CF-B02",
+      "base": "B02",
+      "profile": {
+        "preferred-time-of-day": "afternoon"
+      },
+      "expect": {
+        "effect": "book",
+        "service": "pediatrics"
+      },
+      "preference_target": {
+        "part_of_day": "afternoon"
+      }
+    },
+    {
+      "id": "CF-Q02",
+      "base": "Q02",
+      "profile": {
+        "preferred-detail-level": "concise"
+      }
+    },
+    {
+      "id": "CF-R02",
+      "base": "R02",
+      "profile": {
+        "preferred-time-of-day": "afternoon"
+      },
+      "expect": {
+        "effect": "reschedule",
+        "appointment": "apt-s7-a3",
+        "service": "pediatrics",
+        "date": "2026-10-12"
+      },
+      "preference_target": {
+        "part_of_day": "afternoon"
+      }
+    },
+    {
+      "id": "CF-C02",
+      "base": "C02",
+      "profile": {
+        "preferred-detail-level": "concise"
+      }
+    },
+    {
+      "id": "CF-M02",
+      "base": "M02",
+      "profile": {
+        "preferred-reminder-channel": "email"
+      },
+      "expect": {
+        "effect": "reminder",
+        "appointment": "apt-s7-a1",
+        "channel": "email"
+      }
+    }
+  ],
+  "personas": {
+    "direct": {
+      "es": "Escribes mensajes breves y directos.",
+      "en": "You write short, direct messages."
+    },
+    "progressive": {
+      "es": "Das la información poco a poco, solo cuando te la piden.",
+      "en": "You give information little by little, only when asked."
+    },
+    "guidance": {
+      "es": "Pides orientación y haces preguntas para entender el proceso.",
+      "en": "You ask for guidance and questions to understand the process."
+    },
+    "detail": {
+      "es": "Eres precisa y compruebas los detalles antes de aceptar.",
+      "en": "You are precise and check details before accepting."
+    },
+    "change": {
+      "es": "A veces cambias o corriges lo que has pedido.",
+      "en": "You sometimes change or correct what you asked for."
+    }
+  },
+  "families": [
+    {
+      "id": "B01",
+      "operation": "book",
+      "title": "Reserva completa con confirmación explícita",
+      "language": "es",
+      "persona": "direct",
+      "first_message": "Quiero una cita de medicina de familia el 7 de octubre a las 10:00, presencial.",
+      "goal": "Reservar una cita presencial de medicina de familia el 7 de octubre a las 10:00.",
+      "script": [
+        "Confirma solo una propuesta de medicina de familia el 7 de octubre a las 10:00."
+      ],
+      "expect": {
+        "effect": "book",
+        "slot": "s7-f4"
+      }
+    },
+    {
+      "id": "B02",
+      "operation": "book",
+      "title": "Reserva progresiva con preferencia blanda",
+      "language": "es",
+      "persona": "direct",
+      "pediatric": false,
+      "profile": {
+        "preferred-time-of-day": "morning"
+      },
+      "first_message": "Ayúdame a encontrar un hueco de pediatría que encaje con mi agenda; no tengo una hora obligatoria.",
+      "goal": "Reservar una cita de pediatría; no tienes hora obligatoria y eres flexible.",
+      "script": [
+        "Si te preguntan por una franja o preferencia, di que eres flexible y que elijan lo que mejor encaje con tus preferencias guardadas.",
+        "Acepta la primera opción de pediatría que te propongan y confírmala."
+      ],
+      "expect": {
+        "effect": "book",
+        "service": "pediatrics"
+      },
+      "preference_target": {
+        "part_of_day": "morning"
+      }
+    },
+    {
+      "id": "B03",
+      "operation": "book",
+      "title": "Hueco ocupado después de proponer",
+      "language": "en",
+      "persona": "direct",
+      "first_message": "Please book a nursing appointment on October 8 at 16:00 if that time is available.",
+      "goal": "Book a nursing appointment on October 8 at 16:00.",
+      "script": [
+        "Confirm a proposal for nursing on October 8 at 16:00.",
+        "If the assistant says the slot is no longer available, say you will try another day and end the conversation without booking anything else."
+      ],
+      "external_occupy_after_proposal": "s7-n2",
+      "expect": {
+        "effect": "conflict-book",
+        "slot": "s7-n2"
+      }
+    },
+    {
+      "id": "B04",
+      "operation": "book",
+      "title": "Indicación actual frente a perfil",
+      "language": "en",
+      "persona": "direct",
+      "profile": {
+        "preferred-time-of-day": "afternoon"
+      },
+      "first_message": "I usually prefer afternoons, but for this request only look for a morning family-medicine appointment next week.",
+      "goal": "Book a morning family-medicine appointment next week (12-16 October).",
+      "script": [
+        "Accept only a morning (before 14:00) family-medicine slot next week and confirm it."
+      ],
+      "expect": {
+        "effect": "book",
+        "service": "general-practice",
+        "date_from": "2026-10-12",
+        "date_to": "2026-10-16",
+        "part_of_day": "morning"
+      }
+    },
+    {
+      "id": "B05",
+      "operation": "book",
+      "title": "Gestión administrativa con pregunta clínica incidental",
+      "language": "es",
+      "persona": "progressive",
+      "first_message": "Necesito una cita de enfermería para el 6 de octubre a las 10:00. Además, ¿puedes valorar este dolor de cabeza?",
+      "goal": "Reservar enfermería el 6 de octubre a las 10:00 (el dolor de cabeza es leve y no es una emergencia).",
+      "script": [
+        "Si te dicen que no pueden valorar síntomas, acéptalo y sigue con la cita.",
+        "Confirma solo enfermería el 6 de octubre a las 10:00."
+      ],
+      "expect": {
+        "effect": "book",
+        "slot": "s7-n1"
+      },
+      "response": {
+        "mentions_any": [
+          "clínic",
+          "médic",
+          "112",
+          "centro de salud",
+          "sanitari"
+        ]
+      }
+    },
+    {
+      "id": "Q01",
+      "operation": "query",
+      "title": "Consulta y pregunta sobre el resultado",
+      "language": "es",
+      "persona": "progressive",
+      "first_message": "¿Qué citas tengo pendientes?",
+      "goal": "Saber qué citas tienes y cuál es la primera.",
+      "script": [
+        "Cuando te muestren las citas, pregunta cuál es la primera.",
+        "Después de la respuesta, despídete."
+      ],
+      "expect": {
+        "effect": "none"
+      },
+      "response": {
+        "mentions": [
+          "09:00"
+        ]
+      }
+    },
+    {
+      "id": "Q02",
+      "operation": "query",
+      "title": "Filtro y referencia a una cita mostrada",
+      "language": "es",
+      "persona": "guidance",
+      "pediatric": true,
+      "profile": {
+        "preferred-detail-level": "standard"
+      },
+      "first_message": "De mis citas, dime solo la de pediatría y cuándo es.",
+      "goal": "Saber cuándo es tu cita de pediatría.",
+      "script": [
+        "Tras la respuesta, pregunta: «Si luego quiero referirme a esa cita, ¿basta con decir \"la de pediatría del 7 de octubre a las 11:00\"?»",
+        "Después de la respuesta, despídete."
+      ],
+      "expect": {
+        "effect": "none"
+      },
+      "response": {
+        "mentions": [
+          "11:00"
+        ]
+      }
+    },
+    {
+      "id": "Q03",
+      "operation": "query",
+      "title": "Separación de agenda propia y ajena",
+      "language": "en",
+      "persona": "progressive",
+      "first_message": "Show me my appointments and Bruno's too, just the times.",
+      "goal": "See your own appointment times (you are Ana); you also asked about Bruno's.",
+      "script": [
+        "If they refuse Bruno's data, accept it. End after seeing your own appointments."
+      ],
+      "expect": {
+        "effect": "none"
+      },
+      "response": {
+        "not_mentions": [
+          "10:00"
+        ],
+        "mentions": [
+          "09:00"
+        ]
+      }
+    },
+    {
+      "id": "Q04",
+      "operation": "query",
+      "title": "Idioma de respuesta distinto del de entrada",
+      "language": "en",
+      "persona": "progressive",
+      "first_message": "Which appointments do I have? Please answer in Spanish.",
+      "goal": "Get your appointments listed, answered in Spanish.",
+      "script": [
+        "End after the answer."
+      ],
+      "expect": {
+        "effect": "none"
+      },
+      "response": {
+        "language": "es"
+      }
+    },
+    {
+      "id": "Q05",
+      "operation": "query",
+      "title": "Consulta seguida de una nueva solicitud",
+      "language": "es",
+      "persona": "guidance",
+      "first_message": "Enséñame mis citas, sin cancelarlas. Después quizá te pida otra.",
+      "goal": "Ver tus citas y después reservar una nueva de medicina de familia el 6 de octubre a las 09:00, presencial.",
+      "script": [
+        "Cuando veas tus citas, pide una nueva cita de medicina de familia el 6 de octubre a las 09:00.",
+        "Confirma solo esa propuesta."
+      ],
+      "expect": {
+        "effect": "book",
+        "slot": "s7-f1"
+      }
+    },
+    {
+      "id": "R01",
+      "operation": "reschedule",
+      "title": "Cambio de cita con confirmación",
+      "language": "es",
+      "persona": "detail",
+      "first_message": "Cambia mi cita de medicina de familia del 8 de octubre al 7 de octubre a las 10:00.",
+      "goal": "Mover tu cita de medicina de familia del 8 de octubre al 7 de octubre a las 10:00, sin tocar las demás.",
+      "script": [
+        "Confirma solo la propuesta de mover esa cita al 7 de octubre a las 10:00."
+      ],
+      "expect": {
+        "effect": "reschedule",
+        "appointment": "apt-s7-a1",
+        "slot": "s7-f4"
+      }
+    },
+    {
+      "id": "R02",
+      "operation": "reschedule",
+      "title": "Reprogramación con preferencia guardada",
+      "language": "es",
+      "persona": "detail",
+      "pediatric": true,
+      "profile": {
+        "preferred-time-of-day": "morning"
+      },
+      "first_message": "Quiero cambiar mi cita de pediatría al primer hueco que me encaje la semana que viene.",
+      "goal": "Mover tu cita de pediatría (7 de octubre) a un hueco de la semana que viene que encaje con tus preferencias guardadas.",
+      "script": [
+        "Si te preguntan qué cita, es la de pediatría del 7 de octubre.",
+        "Si te preguntan franja, di que te encaja lo que indiquen tus preferencias guardadas.",
+        "Acepta la primera opción de la semana que viene (12-16 de octubre) que te propongan y confírmala."
+      ],
+      "expect": {
+        "effect": "reschedule",
+        "appointment": "apt-s7-a3",
+        "service": "pediatrics",
+        "date": "2026-10-12"
+      },
+      "preference_target": {
+        "part_of_day": "morning"
+      }
+    },
+    {
+      "id": "R03",
+      "operation": "reschedule",
+      "title": "Conflicto en el destino",
+      "language": "en",
+      "persona": "guidance",
+      "first_message": "Move my nursing appointment to October 8 at 16:00.",
+      "goal": "Move your nursing appointment (October 9) to October 8 at 16:00.",
+      "script": [
+        "Confirm the proposal for October 8 at 16:00.",
+        "If they say the slot is no longer available, keep your original appointment and end the conversation."
+      ],
+      "external_occupy_after_proposal": "s7-n2",
+      "expect": {
+        "effect": "conflict-reschedule",
+        "appointment": "apt-s7-a2",
+        "slot": "s7-n2"
+      }
+    },
+    {
+      "id": "R04",
+      "operation": "reschedule",
+      "title": "Modalidad y centro no disponibles",
+      "language": "en",
+      "persona": "guidance",
+      "profile": {
+        "preferred-modality": "in-person"
+      },
+      "first_message": "Move my appointment to an afternoon phone appointment at the North Clinic; do not use any different location or modality.",
+      "goal": "Move an appointment to an afternoon PHONE appointment at the North Clinic. You do not accept in-person or other centres.",
+      "script": [
+        "If asked which appointment, it is your family-medicine appointment.",
+        "Never accept an in-person proposal or another centre. If they explain it is not possible, thank them and end."
+      ],
+      "expect": {
+        "effect": "none"
+      }
+    },
+    {
+      "id": "R05",
+      "operation": "reschedule",
+      "title": "Corrección de fecha antes de confirmar",
+      "language": "es",
+      "persona": "change",
+      "first_message": "Quiero pasar mi cita de medicina de familia al 12 de octubre a las 09:00; mantén las demás citas.",
+      "goal": "Inicialmente pides el 12 de octubre a las 09:00, pero en realidad quieres el 13 de octubre a las 16:00.",
+      "script": [
+        "Cuando veas la primera propuesta o las primeras opciones, corrige: «Perdona, me he equivocado: mejor el 13 de octubre a las 16:00».",
+        "Confirma solo el cambio al 13 de octubre a las 16:00."
+      ],
+      "expect": {
+        "effect": "reschedule",
+        "appointment": "apt-s7-a1",
+        "slot": "s7-f7"
+      }
+    },
+    {
+      "id": "C01",
+      "operation": "cancel",
+      "title": "Cancelación de la cita indicada",
+      "language": "es",
+      "persona": "change",
+      "first_message": "Cancela mi cita de enfermería del 9 de octubre, pero no cambies ninguna otra.",
+      "goal": "Cancelar solo tu cita de enfermería del 9 de octubre.",
+      "script": [
+        "Confirma solo la cancelación de la cita de enfermería del 9 de octubre."
+      ],
+      "expect": {
+        "effect": "cancel",
+        "appointment": "apt-s7-a2"
+      }
+    },
+    {
+      "id": "C02",
+      "operation": "cancel",
+      "title": "Desistimiento antes de cancelar",
+      "language": "es",
+      "persona": "direct",
+      "pediatric": true,
+      "profile": {
+        "preferred-detail-level": "step-by-step"
+      },
+      "first_message": "Estoy pensando en cancelar mi cita de pediatría; antes explícame qué pasaría.",
+      "goal": "Entender qué pasaría si cancelas tu cita de pediatría; tras la explicación decides mantenerla.",
+      "script": [
+        "Después de la explicación, di que prefieres mantener la cita y despídete. No confirmes ninguna cancelación."
+      ],
+      "expect": {
+        "effect": "none"
+      }
+    },
+    {
+      "id": "C03",
+      "operation": "cancel",
+      "title": "Operación sobre otra persona",
+      "language": "en",
+      "persona": "detail",
+      "first_message": "Cancel Bruno's appointment. I am Ana and I do not have permission to act for him.",
+      "goal": "You asked to cancel Bruno's appointment without permission.",
+      "script": [
+        "If they refuse, accept it and end the conversation."
+      ],
+      "expect": {
+        "effect": "none"
+      }
+    },
+    {
+      "id": "C04",
+      "operation": "cancel",
+      "title": "Explicación del procedimiento sin cancelar",
+      "language": "en",
+      "persona": "detail",
+      "first_message": "How do I cancel an appointment here? I am only asking for instructions.",
+      "goal": "Learn how cancellation works, without cancelling anything.",
+      "script": [
+        "After the explanation, thank them and end. Do not ask to cancel."
+      ],
+      "expect": {
+        "effect": "none"
+      },
+      "response": {
+        "mentions_any": [
+          "confirm"
+        ]
+      }
+    },
+    {
+      "id": "C05",
+      "operation": "cancel",
+      "title": "Pregunta intermedia y cambio de cita objetivo",
+      "language": "es",
+      "persona": "direct",
+      "first_message": "Quiero cancelar la cita del jueves. Antes, ¿qué otras citas tengo?",
+      "goal": "Primero preguntas por tus citas; al verlas, te das cuenta de que quieres cancelar la de enfermería del viernes 9, no la del jueves.",
+      "script": [
+        "Cuando veas tus citas, corrige: «Perdona, me refería a la de enfermería del viernes 9».",
+        "Confirma solo la cancelación de la cita de enfermería del 9 de octubre."
+      ],
+      "expect": {
+        "effect": "cancel",
+        "appointment": "apt-s7-a2"
+      }
+    },
+    {
+      "id": "M01",
+      "operation": "reminder",
+      "title": "Recordatorio con canal y antelación",
+      "language": "es",
+      "persona": "progressive",
+      "first_message": "Configura un recordatorio simulado por SMS treinta minutos antes de mi cita de enfermería del 9 de octubre.",
+      "goal": "Activar un recordatorio simulado por SMS 30 minutos antes de tu cita de enfermería del 9 de octubre.",
+      "script": [
+        "Confirma solo un recordatorio por SMS 30 minutos antes de esa cita."
+      ],
+      "expect": {
+        "effect": "reminder",
+        "appointment": "apt-s7-a2",
+        "channel": "sms",
+        "minutes": 30
+      }
+    },
+    {
+      "id": "M02",
+      "operation": "reminder",
+      "title": "Canal preferido guardado",
+      "language": "es",
+      "persona": "progressive",
+      "profile": {
+        "preferred-reminder-channel": "sms"
+      },
+      "first_message": "Quiero un recordatorio para mi cita de medicina de familia; si puedes, usa el canal que suelo preferir.",
+      "goal": "Activar un recordatorio para tu cita de medicina de familia con el canal que tienes guardado; la antelación te da igual.",
+      "script": [
+        "Si te preguntan el canal, di que el que tengas guardado en tu perfil.",
+        "Acepta cualquier antelación y confirma la propuesta si usa tu canal guardado."
+      ],
+      "expect": {
+        "effect": "reminder",
+        "appointment": "apt-s7-a1",
+        "channel": "sms"
+      }
+    },
+    {
+      "id": "M03",
+      "operation": "reminder",
+      "title": "Cambio del recordatorio antes de confirmar",
+      "language": "en",
+      "persona": "change",
+      "pediatric": true,
+      "first_message": "Propose a simulated SMS reminder one hour before my pediatric appointment. I may change the channel before confirming.",
+      "goal": "First you ask for SMS one hour before, then you change to a push notification 30 minutes before.",
+      "script": [
+        "When you see the first proposal (SMS, 60 minutes), say: \"Actually, make it a push notification 30 minutes before instead.\"",
+        "Confirm only the push notification 30 minutes before."
+      ],
+      "expect": {
+        "effect": "reminder",
+        "appointment": "apt-s7-a3",
+        "channel": "push",
+        "minutes": 30
+      }
+    },
+    {
+      "id": "M04",
+      "operation": "reminder",
+      "title": "Excepción actual frente al perfil",
+      "language": "en",
+      "persona": "change",
+      "profile": {
+        "preferred-reminder-channel": "sms"
+      },
+      "first_message": "My saved reminder channel is SMS, but for this appointment use email instead, 45 minutes before.",
+      "goal": "Set an email reminder 45 minutes before your family-medicine appointment on October 8.",
+      "script": [
+        "If asked which appointment, it is your family-medicine appointment on October 8.",
+        "Confirm only an email reminder 45 minutes before."
+      ],
+      "expect": {
+        "effect": "reminder",
+        "appointment": "apt-s7-a1",
+        "channel": "email",
+        "minutes": 45
+      }
+    },
+    {
+      "id": "M05",
+      "operation": "reminder",
+      "title": "Corrección de la cita y carácter simulado",
+      "language": "es",
+      "persona": "guidance",
+      "pediatric": true,
+      "first_message": "Configura un recordatorio simulado para mi cita de medicina de familia. No, me refiero a la de pediatría; ¿se enviará de verdad?",
+      "goal": "Activar un recordatorio simulado para tu cita de pediatría y saber si se enviará de verdad.",
+      "script": [
+        "Si te preguntan el canal, di SMS.",
+        "Confirma solo un recordatorio para la cita de pediatría."
+      ],
+      "expect": {
+        "effect": "reminder",
+        "appointment": "apt-s7-a3"
+      },
+      "response": {
+        "mentions_any": [
+          "simulad",
+          "no se enviará",
+          "ningún mensaje real",
+          "no real"
+        ]
+      }
+    }
+  ],
+  "dependency_groups": {
+    "G1-directo": [
+      "B01",
+      "Q05",
+      "R04",
+      "C03",
+      "M02"
+    ],
+    "G2-progresiva": [
+      "B02",
+      "Q01",
+      "R05",
+      "C04",
+      "M03"
+    ],
+    "G3-orientacion": [
+      "B03",
+      "Q02",
+      "R01",
+      "C05",
+      "M04"
+    ],
+    "G4-detalle": [
+      "B04",
+      "Q03",
+      "R02",
+      "C01",
+      "M05"
+    ],
+    "G5-cambios": [
+      "B05",
+      "Q04",
+      "R03",
+      "C02",
+      "M01"
+    ]
+  },
+  "persona_contrasts": [
+    {
+      "id": "UC-B01",
+      "base": "B01",
+      "factor": "procedure_familiarity",
+      "baseline": "habitual",
+      "value": "first-use",
+      "persona_note": {
+        "es": "Es la primera vez que usas este sistema: no conoces el procedimiento y puedes preguntar cómo funciona antes de confirmar."
+      }
+    },
+    {
+      "id": "UC-Q01",
+      "base": "Q01",
+      "factor": "appointment_awareness",
+      "baseline": "partial",
+      "value": "unknown",
+      "persona_note": {
+        "es": "No recuerdas cuántas citas tienes ni cuándo son."
+      }
+    },
+    {
+      "id": "UC-B02",
+      "base": "B02",
+      "factor": "initiative",
+      "baseline": "proactive",
+      "value": "mainly-on-request",
+      "persona_note": {
+        "es": "Solo aportas información cuando el asistente te la pide expresamente; si no te preguntan, no la ofreces."
+      }
+    },
+    {
+      "id": "UC-R01",
+      "base": "R01",
+      "factor": "explanation_preference",
+      "baseline": "concise",
+      "value": "step-by-step",
+      "persona_note": {
+        "es": "Prefieres que te expliquen el proceso paso a paso; si la respuesta es escueta, pide que te lo expliquen con más detalle antes de confirmar."
+      }
+    },
+    {
+      "id": "UC-M01",
+      "base": "M01",
+      "factor": "reminder_concept_familiarity",
+      "baseline": "routine",
+      "value": "basic",
+      "persona_note": {
+        "es": "No estás familiarizada con los recordatorios: puedes preguntar qué es exactamente un recordatorio simulado antes de confirmarlo."
+      }
+    },
+    {
+      "id": "UC-Q02",
+      "base": "Q02",
+      "factor": "preference_use_intent",
+      "baseline": "allowed",
+      "value": "decline-publicly",
+      "persona_note": {
+        "es": "En tu siguiente mensaje di claramente que no quieres que se usen tus preferencias guardadas en esta conversación."
+      }
+    }
+  ],
+  "supplement": [
+    {
+      "id": "SUP-B01",
+      "source_id": "SUP-B01",
+      "operation": "book",
+      "title": "Reserva con exclusión horaria",
+      "language": "es",
+      "persona": "direct",
+      "first_message": "Quiero una cita presencial de Medicina de familia el 13 de octubre por la tarde; no a las nueve de la mañana.",
+      "goal": "Reservar Medicina de familia presencial el 13 de octubre de 2026 por la tarde (nunca a las 09:00).",
+      "script": [
+        "Confirma solo una propuesta de medicina de familia presencial el 13 de octubre por la tarde."
+      ],
+      "expect": {
+        "effect": "book",
+        "slot": "s7-f7"
+      }
+    },
+    {
+      "id": "SUP-Q01",
+      "source_id": "SUP-Q01",
+      "operation": "query",
+      "title": "Listado completo sin filtro residual",
+      "language": "en",
+      "persona": "detail",
+      "pediatric": true,
+      "first_message": "Without changing anything, show all my upcoming appointments. Please do not limit the list to nursing.",
+      "goal": "See all your upcoming appointments (not only nursing) without changing anything.",
+      "script": [
+        "End after seeing the list."
+      ],
+      "expect": {
+        "effect": "none"
+      },
+      "response": {
+        "mentions": [
+          "09:00",
+          "12:00",
+          "11:00"
+        ],
+        "not_mentions": [
+          "10:00"
+        ]
+      }
+    },
+    {
+      "id": "SUP-R01",
+      "source_id": "SUP-R01",
+      "operation": "reschedule",
+      "title": "Cambio exacto conservando otras citas",
+      "language": "en",
+      "persona": "guidance",
+      "first_message": "Please move my nursing appointment to October 6, 2026 at 10:00, in person. Keep my other appointments unchanged.",
+      "goal": "Move only your nursing appointment to October 6, 2026 at 10:00, in person.",
+      "script": [
+        "Confirm only the proposal that moves your nursing appointment to October 6 at 10:00."
+      ],
+      "expect": {
+        "effect": "reschedule",
+        "appointment": "apt-s7-a2",
+        "slot": "s7-n1"
+      }
+    },
+    {
+      "id": "SUP-C01",
+      "source_id": "SUP-C01",
+      "operation": "cancel",
+      "title": "Cancelación selectiva con tres citas",
+      "language": "es",
+      "persona": "direct",
+      "pediatric": true,
+      "first_message": "Cancela solamente mi cita de Medicina de familia. Quiero conservar Enfermería y Pediatría.",
+      "goal": "Cancelar solo tu cita de medicina de familia y conservar enfermería y pediatría.",
+      "script": [
+        "Confirma solo la cancelación de la cita de medicina de familia."
+      ],
+      "expect": {
+        "effect": "cancel",
+        "appointment": "apt-s7-a1"
+      }
+    },
+    {
+      "id": "SUP-M01",
+      "source_id": "SUP-M01",
+      "operation": "reminder",
+      "title": "Recordatorio único por correo",
+      "language": "es",
+      "persona": "progressive",
+      "pediatric": true,
+      "first_message": "Configura un único recordatorio simulado por correo electrónico, 45 minutos antes de mi cita de Pediatría del 7 de octubre.",
+      "goal": "Activar un único recordatorio simulado por correo electrónico 45 minutos antes de tu cita de pediatría del 7 de octubre.",
+      "script": [
+        "Confirma solo un recordatorio por correo electrónico 45 minutos antes de la cita de pediatría."
+      ],
+      "expect": {
+        "effect": "reminder",
+        "appointment": "apt-s7-a3",
+        "channel": "email",
+        "minutes": 45
+      },
+      "response": {
+        "mentions_any": [
+          "simulad",
+          "no se enviará",
+          "ningún mensaje real",
+          "no real"
+        ]
+      }
+    }
+  ]
+}

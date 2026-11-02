@@ -1,0 +1,84 @@
+{
+  "A:S1 responde en inglés en el primer turno de los episodios en inglés:google": {
+    "evaluated": [
+      2,
+      12
+    ],
+    "fixed": [
+      12,
+      12
+    ]
+  },
+  "A:S1 responde en inglés en el primer turno de los episodios en inglés:groq": {
+    "evaluated": [
+      0,
+      12
+    ],
+    "fixed": [
+      12,
+      12
+    ]
+  },
+  "B:El agente de contexto interpreta el primer mensaje de N-R02 como un cambio:google": {
+    "evaluated": [
+      0,
+      5
+    ],
+    "fixed": [
+      5,
+      5
+    ]
+  },
+  "B:El agente de contexto interpreta el primer mensaje de N-R02 como un cambio:groq": {
+    "evaluated": [
+      0,
+      5
+    ],
+    "fixed": [
+      1,
+      5
+    ]
+  },
+  "B:Las reservas legítimas de control siguen interpretándose como reservas:google": {
+    "evaluated": [
+      8,
+      8
+    ],
+    "fixed": [
+      8,
+      8
+    ]
+  },
+  "B:Las reservas legítimas de control siguen interpretándose como reservas:groq": {
+    "evaluated": [
+      8,
+      8
+    ],
+    "fixed": [
+      8,
+      8
+    ]
+  },
+  "C:La redacción conserva la explicación del orden de los huecos:groq": {
+    "evaluated": [
+      0,
+      12
+    ],
+    "fixed": [
+      12,
+      12
+    ]
+  },
+  "consumption": {
+    "google": {
+      "calls": 77,
+      "input_tokens": 131831,
+      "output_tokens": 7576
+    },
+    "groq": {
+      "calls": 101,
+      "input_tokens": 135995,
+      "output_tokens": 12663
+    }
+  }
+}

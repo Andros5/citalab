@@ -1,0 +1,261 @@
+\chapter{Introducción}
+\label{chap:introduccion}
+
+\section{Motivación}
+
+Los asistentes conversacionales basados en modelos de lenguaje de gran escala
+(LLM) han evolucionado desde sistemas centrados en generar texto hasta agentes
+capaces de mantener estado, planificar y utilizar herramientas. Esta evolución
+permite plantear interfaces en lenguaje natural para procesos administrativos
+que tradicionalmente requieren navegar por formularios, conocer la organización
+de un servicio o recurrir a atención telefónica. La gestión de citas sanitarias
+es un caso especialmente representativo: la operación parece sencilla, pero
+combina diversidad de usuarios, información sensible, restricciones de agenda,
+integración con sistemas heterogéneos y consecuencias reales si una acción se
+ejecuta de forma incorrecta.
+
+Un LLM aislado no ofrece por sí mismo las garantías necesarias. Puede interpretar
+mal una fecha, mantener una preferencia obsoleta, presentar como disponible un
+hueco inexistente o redactar una confirmación aunque la operación haya fallado.
+Además, una respuesta bien escrita puede revelar datos a alguien que no tiene
+permiso para consultarlos o utilizar información para un fin no autorizado.
+Por ello, el interés de este trabajo no reside únicamente en
+mejorar la conversación, sino en estudiar una arquitectura que separe
+interpretación, personalización, validación y ejecución.
+
+La literatura sobre agentes basados en LLM distingue componentes de percepción,
+razonamiento, memoria y acción, y muestra que la colaboración entre roles puede
+incorporar capacidades complementarias \citep{xi2023agents,wu2024autogen}. Sin
+embargo, añadir agentes también introduce coordinación, latencia y nuevas rutas
+de fallo. En paralelo, la personalización mediante recuperación de información
+del usuario mejora diversas tareas, pero su utilidad depende de seleccionar
+datos relevantes y no de volcar un perfil completo en el contexto
+\citep{salemi2024lamp}. Esto plantea la siguiente pregunta:
+\textquestiondown{}qué ventajas y dificultades tiene usar varios agentes, en lugar
+de uno solo, para gestionar citas de forma personalizada y segura?
+
+\section{Problema y preguntas de investigación}
+
+El trabajo estudia cómo diseñar y evaluar un asistente que gestione citas
+sanitarias y adapte la conversación a las preferencias del usuario. Para
+completar una gestión, el sistema debe interpretar la petición, utilizar la
+información permitida y ejecutar correctamente las operaciones sobre la agenda.
+
+Se comparan distintas arquitecturas en un entorno simulado, con perfiles y
+agendas sintéticos. La evaluación busca responder las siguientes preguntas:
+
+\begin{description}[style=nextline]
+  \item[PI1.] \textquestiondown{}Qué cambia al utilizar cinco agentes especializados frente a un
+  único agente, cuando ambos disponen del mismo modelo, herramientas y controles?
+  \item[PI2.] \textquestiondown{}Se tienen en cuenta las preferencias del usuario cuando
+  corresponde y se descartan cuando no deben utilizarse?
+  \item[PI3.] \textquestiondown{}Los controles del sistema evitan accesos y operaciones no
+  autorizados sin impedir gestiones legítimas?
+  \item[PI4.] \textquestiondown{}Cómo evaluar conjuntamente si la gestión se completa, la
+  respuesta se adapta al usuario y se respetan las restricciones del sistema?
+\end{description}
+
+\section{Objetivos}
+
+Para responder a estas preguntas, se plantean los siguientes objetivos:
+
+\begin{enumerate}
+  \item Modelar el dominio de citas y los flujos de solicitud, consulta,
+        reprogramación, cancelación y recordatorio.
+  \item Convertir los requisitos relevantes del RGPD, del Reglamento de IA y de
+        la Ley 41/2002 en reglas técnicas y criterios de prueba.
+  \item Definir responsabilidades, contratos y rutas de escalado para los
+        componentes de contexto, perfil, cumplimiento, personalización y
+        orquestación.
+  \item Implementar un simulador con datos sintéticos y un subconjunto de
+        recursos de FHIR R4 (\textit{Fast Healthcare Interoperability
+        Resources}), estándar de HL7 para intercambiar información sanitaria
+        \citep{fhirR4}.
+  \item Construir tres variantes comparables: una arquitectura con cinco
+        agentes LLM especializados (M5), una con un único agente LLM (S1) y otra
+        híbrida, con un flujo programado y tareas LLM acotadas (H).
+  \item Evaluar éxito extremo a extremo, seguridad funcional, cumplimiento,
+        calidad de personalización, tiempo de inferencia y consumo.
+  \item Facilitar la reproducción de las pruebas mediante el código, los datos
+        sintéticos y la configuración utilizada.
+\end{enumerate}
+
+\section{Alcance}
+
+El alcance incluye identificación y representación simuladas, consulta de
+disponibilidad y citas propias, reserva, reprogramación, cancelación y
+recordatorios sintéticos. Las preferencias pueden ordenar huecos compatibles
+o adaptar la respuesta. FHIR se utiliza para representar las citas y la agenda
+con estructuras definidas para el intercambio de información sanitaria, en
+lugar de crear formatos propios. El simulador implementa solo los recursos y
+campos necesarios para las gestiones estudiadas. El escalado detiene el flujo
+y orienta hacia atención humana, sin una cola conectada con profesionales.
+
+La implementación disponible ejecuta las cinco gestiones conversacionales en
+las agendas sintéticas de medicina de familia, pediatría y enfermería, que solo
+ofrecen citas presenciales. El sistema reconoce las peticiones de citas por
+teléfono o videollamada, pero estas modalidades no tienen huecos disponibles en
+esas agendas. Los recordatorios se configuran en el simulador, sin enviar
+mensajes externos. La consulta autorizada es de lectura. Las operaciones con
+efectos requieren confirmar una propuesta válida.
+
+El asistente no realiza diagnósticos ni pronósticos y tampoco prescribe
+tratamientos. No decide la urgencia de una situación, la prioridad de un
+paciente o su acceso a una prestación sanitaria. Trabaja con datos sintéticos y
+no se conecta a sistemas sanitarios reales. Su función es apoyar la gestión de
+citas sin sustituir la atención de profesionales sanitarios o administrativos.
+Si detecta una posible emergencia, detiene la gestión e indica los canales
+oficiales de atención definidos para ese caso.
+
+\section{Metodología de desarrollo y evaluación}
+
+El desarrollo comenzó con el análisis de las gestiones de citas, la normativa
+y los trabajos relacionados. A partir de esos requisitos se construyó una
+primera versión funcional. Después se incorporaron los perfiles, los agentes,
+los controles y la interfaz CitaLab. Las pruebas permitieron detectar y
+corregir fallos durante la integración.
+
+Para la evaluación se elaboró un corpus sintético propio con casos en español
+e inglés. Se comparan tres arquitecturas (M5, S1 y H) con dos modelos:
+GPT-OSS~20B \citep{openai2025gptoss}, utilizado a través de Groq, y
+Gemini~3.5 Flash-Lite \citep{gemini35FlashLiteDocs}, a través de Google.
+Las variantes resuelven los mismos casos con el mismo perfil, agenda,
+permisos y herramientas. Dentro de cada modelo, esas condiciones permiten
+comparar las arquitecturas.
+
+Un usuario simulado genera los mensajes a partir de un objetivo y de la
+conversación que puede ver. Responde a lo que pregunta el asistente sin conocer
+sus decisiones internas. Antes de la comparación, las pruebas y el piloto
+comprueban el simulador y los instrumentos de evaluación. Las versiones de
+código, datos y \emph{prompts} quedan registradas para cada ejecución.
+
+Las comprobaciones automáticas verifican las operaciones realizadas y el
+estado de la agenda. Un jurado de dos LLM valora la conversación, su
+adaptación al usuario y si el asistente comunica lo que realmente ha ocurrido,
+y una revisión humana ciega de una muestra comprueba sus notas. También
+se analizan las llamadas, los tokens y el tiempo empleado. Los errores y las
+interrupciones se conservan en los resultados. La
+Tabla~\ref{tab:trazabilidad-preguntas} resume qué se comprueba para cada
+pregunta. El capítulo~\ref{chap:metodologia-evaluacion} explica el procedimiento
+completo y sus límites.
+
+\begin{table}[H]
+\centering
+\caption{Trazabilidad entre preguntas y evidencia experimental.}
+\label{tab:trazabilidad-preguntas}
+\small
+\begin{tabularx}{\textwidth}{L{0.09\textwidth}Y}
+\toprule
+\textbf{PI} & \textbf{Qué se comprueba} \\
+\midrule
+PI1 & Resultado de las gestiones, errores y recursos utilizados por cada arquitectura dentro de un mismo modelo. \\
+PI2 & Aplicación de las preferencias cuando corresponden y descarte cuando no deben utilizarse. \\
+PI3 & Accesos u operaciones no autorizados y bloqueos injustificados de gestiones legítimas. \\
+PI4 & Correspondencia entre conversación, operaciones y agenda, junto con la revisión de la personalización y las restricciones. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Contribución}
+
+La contribución defendible no es la mera combinación de agentes, preferencias y
+FHIR, ya presente de forma parcial en trabajos recientes. Se propone integrar y
+evaluar, en un mismo prototipo, una combinación que no se encontró en la
+revisión realizada: responsabilidades especializadas, memoria personal
+selectiva y vigente, consulta y reserva de citas mediante operaciones
+predefinidas y controladas por el sistema,
+controles derivados de normativa europea y una traza mínima que permita atribuir
+propuesta, validación y ejecución sin copiar contenido personal innecesario.
+
+La aportación es técnica y experimental. Además del prototipo, incluye un
+procedimiento de evaluación que contrasta entre sí el estado final de la
+agenda, las trazas de cada decisión, un jurado de dos LLM y una revisión humana
+ciega. El análisis se limita al corpus
+sintético y la configuración evaluada. No demuestra preparación clínica ni
+superioridad general. Permite comparar resultado, coste de coordinación y
+fallos observados antes de una validación con organizaciones o usuarios reales.
+
+\section{Resultados principales}
+\label{sec:intro-resultados}
+
+La campaña final ejecutó 276 episodios, 46 por cada combinación de arquitectura
+y modelo, con un corpus distinto del que se usó para ajustar las instrucciones.
+Para abreviar, se llama Groq a la configuración con GPT-OSS~20B y Gemini a la de
+Gemini~3.5 Flash-Lite. Los resultados responden a las preguntas de
+investigación dentro del entorno sintético estudiado, y la
+Tabla~\ref{tab:respuestas-pi} los resume junto con sus limitaciones.
+
+\paragraph{PI1. Agentes especializados.}
+M5 no obtiene una ventaja significativa en el éxito de las gestiones,
+comprobado sobre la agenda. Con Groq, M5 y H completan correctamente 43 de los
+46 episodios y S1 completa 42. Con Gemini, M5 y H completan 43 y S1 los 46. En
+cambio, M5 hace el doble de llamadas que S1 y H, usa unas 2,4 veces los tokens
+de H y tiene el mayor tiempo de inferencia. Al reunir los dos modelos, H
+obtiene además notas iguales o superiores a las de M5 en las seis dimensiones
+de calidad, tanto en la revisión humana como en el jurado. En estas gestiones, repartir el trabajo entre cinco agentes no compensa
+su coste. La explicación más probable es que los fallos más frecuentes se
+originan al interpretar la petición y al actualizar la tarea, dos pasos que M5
+comparte con H, y que los agentes que añade M5 actúan después de ellos.
+
+\paragraph{PI2. Preferencias.}
+Cuando la petición dejaba la hora al perfil, la cita final quedó en la franja
+guardada en los 15 episodios de Gemini y en 8 de los 15 de Groq. Con Groq, M5 y
+H ordenaron bien los huecos, pero la redacción quitó en ocho de diez mensajes la
+frase que explicaba ese orden, y sin esa explicación el usuario simulado, que no
+conocía su preferencia, tendió a elegir la opción más temprana. S1 con Groq,
+además, solo consultó el perfil en tres de los siete episodios en los que hacía
+falta. Cuando la petición contradecía el perfil, el asistente siguió la
+petición en 11 de los 12 episodios. Para personalizar no basta con ordenar bien
+las opciones, también hay que explicar por qué se ofrece primero una de ellas.
+
+\paragraph{PI3. Controles.}
+Las comprobaciones de seguridad del oráculo no detectaron ningún incumplimiento
+en los 276 episodios: ninguna escritura se hizo sin confirmación, las citas de
+otras personas no cambiaron y no hubo cambios en otras citas propias. Tampoco se
+bloqueó ninguna gestión legítima. Esas comprobaciones no cubren todo el
+contenido de la respuesta, y en un episodio el asistente añadió consejos
+clínicos que el oráculo no detectó. Además, una confirmación correcta no
+garantiza que se cumpla la intención de la persona. En nueve episodios, una
+petición ambigua para mover una cita se convirtió en una reserva nueva,
+propuesta con claridad, aceptada y autorizada. La comprobación que revisa la
+redacción antes de mostrarla también protege menos de lo que parece. De los 32
+borradores que sustituyó por parecer anuncios de un efecto, solo tres
+anunciaban o prometían algo que no había ocurrido.
+
+\paragraph{PI4. Evaluación conjunta.}
+Ningún instrumento bastó por sí solo, porque cada uno detectó problemas que los
+demás no veían. El oráculo detectó los 16 episodios fallidos, aunque en 11 de
+ellos el usuario simulado había dado por conseguido su objetivo. El jurado de
+dos LLM separó casi por completo los fallos de los éxitos y detectó un falso
+éxito del oráculo. Su concordancia con la revisión humana es moderada o buena,
+con un acuerdo exacto de entre el 72 y el 95\,\% según el juez y la dimensión,
+y el jurado es algo más severo. Las trazas permitieron localizar el origen de
+los errores, repartido entre la interpretación de la petición, la
+actualización del estado, los contratos de las herramientas, las instrucciones
+que construye el código y la redacción.
+
+\paragraph{Alcance.}
+Estos resultados se limitan al corpus sintético, a los dos modelos y a las
+gestiones estudiadas. No permiten establecer una clasificación general de las
+arquitecturas ni sacar conclusiones sobre pacientes reales, la seguridad
+clínica o el cumplimiento jurídico de un despliegue. El
+capítulo~\ref{chap:conclusiones} desarrolla estas conclusiones, junto con las
+limitaciones y el trabajo futuro.
+
+\section{Estructura de la memoria}
+
+El capítulo~\ref{chap:fundamentos} define IA agéntica y personalización.
+El capítulo~\ref{chap:dominio-regulado} delimita dominio, datos y requisitos.
+El capítulo~\ref{chap:estado-arte} compara antecedentes y deriva criterios de
+diseño. Los capítulos~\ref{chap:diseno} y~\ref{chap:implementacion} justifican
+la arquitectura y explican su realización, respectivamente. El
+capítulo~\ref{chap:metodologia-evaluacion} describe los instrumentos y cálculos.
+El capítulo~\ref{chap:resultados} presenta la cobertura de la evaluación, los
+resultados por configuración, el análisis de errores y un estudio de casos. El
+capítulo~\ref{chap:discusion} interpreta esos resultados, propone y comprueba
+correcciones, responde a las preguntas de investigación y examina las amenazas
+a la validez. El
+capítulo~\ref{chap:conclusiones} recoge las conclusiones, el grado de
+cumplimiento de los objetivos, las limitaciones y el trabajo futuro. Los
+apéndices recogen el inventario normativo con la trazabilidad de requisitos y
+los criterios de revisión de las conversaciones.

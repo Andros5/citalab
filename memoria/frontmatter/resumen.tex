@@ -1,0 +1,31 @@
+\chapter*{Resumen}
+\addcontentsline{toc}{chapter}{Resumen}
+
+Este Trabajo Fin de Máster estudia IA agéntica para personalizar la gestión
+conversacional de citas sanitarias en un entorno simulado. La arquitectura
+principal, M5, distribuye cinco responsabilidades LLM: contexto, perfiles,
+cumplimiento, personalización y orquestación. Se compara con S1, un agente
+único, y H, un flujo híbrido programado. Las tres variantes comparten
+herramientas y controles de acceso, confirmación y escritura.
+
+El prototipo utiliza perfiles y agendas sintéticos y un subconjunto FHIR R4
+para reservar, consultar, reprogramar y cancelar citas y configurar
+recordatorios sin envío externo. La personalización adapta respuestas y
+ordena huecos compatibles, sin modificar permisos ni resultados. CitaLab
+permite interactuar, inspeccionar llamadas y revisar conversaciones.
+
+La evaluación ejecuta 276 episodios con dos modelos y un usuario simulado,
+separados del corpus empleado para ajustar las instrucciones. El éxito se
+comprueba sobre la agenda, y la calidad de la conversación se valora con un
+jurado de dos LLM, contrastado con una revisión humana ciega de una muestra y
+con el oráculo. No se observa una ventaja significativa de M5 en éxito, mientras que
+su coste es sistemáticamente mayor: el doble de llamadas y unas 2,4 veces los
+tokens de H, que obtiene una calidad igual o superior. No se observan
+escrituras sin confirmación ni cambios en citas ajenas, pero confirmar
+correctamente una operación no garantiza cumplir la intención de la persona. Las conclusiones se limitan al
+entorno sintético estudiado. El código, los
+datos y los resultados están disponibles en \url{https://github.com/Andros5/citalab}.
+
+\vspace{1em}
+\noindent\textbf{Palabras clave:} IA agéntica, personalización, sistemas
+multiagente, citas sanitarias, FHIR, evaluación.

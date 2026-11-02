@@ -1,0 +1,100 @@
+\chapter{Criterios de revisión de conversaciones}
+\label{app:instrumentos-revision}
+
+Este apéndice desarrolla la escala del capítulo~\ref{chap:metodologia-evaluacion}.
+Los dos jueces del jurado y la revisión humana aplican los mismos anclajes, que el
+jurado recibe literalmente en sus instrucciones (versión \texttt{judge-v1}), y
+ven la misma información del episodio (apartado~\ref{sec:metodo-mixta}).
+Los ejemplos son ilustrativos, no anotaciones de episodios ejecutados.
+
+\section{Dimensiones del asistente}
+
+Se puntúa cada dimensión por separado y se indica la evidencia que justifica la
+nota. El jurado da los números de los mensajes y copia un fragmento literal
+breve de uno de ellos, que el programa comprueba. En la revisión humana se
+anotan los mensajes que justifican la nota. La Tabla~\ref{tab:anclajes-asistente} concreta los
+niveles. No se compensa un error central con respuestas correctas en otros
+turnos.
+
+\begingroup
+\setlength{\tabcolsep}{4pt}
+\small
+\begin{longtable}{L{0.15\textwidth}L{0.18\textwidth}L{0.18\textwidth}L{0.18\textwidth}L{0.18\textwidth}}
+\caption{Anclajes de la escala del asistente.}\label{tab:anclajes-asistente}\\
+\toprule
+\textbf{Dimensión} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Dimensión} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} \\
+\midrule
+\endhead
+Respuesta administrativa & Responde mal al objetivo central o anuncia un efecto falso. & Orientación insuficiente con un defecto importante para resolver la gestión. & Resuelve la necesidad con un defecto relevante, no decisivo. & Respuesta correcta y adecuada, incluido un rechazo justificado. \\
+Continuidad & Pierde la tarea o ignora una corrección expresa. & Conserva fragmentos, pero obliga a reconstruir información importante. & Mantiene la tarea con alguna aclaración redundante. & Conserva información compatible y actualiza correcciones sin arrastre indebido. \\
+Claridad & No se comprende qué significa la respuesta o qué hacer. & Ambigüedad importante en instrucciones o explicación. & Comprensible, pero requiere releer o aclarar un término. & Directa y comprensible, con la siguiente acción clara cuando corresponde. \\
+Ausencia de repetición & Un bucle impide avanzar en la gestión. & Repite solicitudes o información de forma que dificulta avanzar. & Redundancia evitable, pero la gestión progresa. & No repite sin necesidad. Confirmaciones obligatorias no cuentan como redundancia. \\
+Adecuación al perfil & Contradice una necesidad expresa o impone un estereotipo. & Omite una adaptación relevante y dificulta la interacción. & Adaptación parcial con un defecto no decisivo. & Usa necesidades y preferencias relevantes sin añadir información innecesaria. \\
+Fidelidad material & Dato central falso o anuncio de una escritura inexistente. & Omisión o discrepancia importante respecto a los hechos disponibles. & Hechos centrales correctos con un defecto no decisivo de presentación. & Petición, datos comunicados y efectos observados concuerdan. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+Si Ana pide otra hora y el asistente sigue ofreciendo la que rechazó, existe
+un problema de continuidad aunque el mensaje sea claro. Si el asistente anuncia
+una reserva y la evidencia demuestra que no se creó, respuesta administrativa
+y fidelidad material reciben 0. Claridad se valora según la comprensión del
+texto, no se reduce automáticamente por ese error. Una negativa correcta por
+falta de permiso puede recibir 3 en respuesta administrativa: no reservar no
+equivale siempre a fallar.
+
+\section{Dimensiones del usuario simulado}
+
+Se juzgan sus mensajes frente al objetivo, la persona funcional y la
+información pública permitida. Un error del asistente o de la agenda no se
+atribuye al simulador. Se usa la misma graduación: 0 incumple la dimensión,
+1 presenta un defecto importante, 2 es utilizable con un defecto no decisivo
+y 3 conserva la conducta esperada. La Tabla~\ref{tab:anclajes-simulador}
+especifica qué se observa en cada caso.
+
+\begin{longtable}{L{0.23\textwidth}L{0.32\textwidth}L{0.33\textwidth}}
+\caption{Conductas revisadas del usuario simulado.}\label{tab:anclajes-simulador}\\
+\toprule
+\textbf{Dimensión} & \textbf{Conducta adecuada} & \textbf{Ejemplo de incumplimiento} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Dimensión} & \textbf{Conducta adecuada} & \textbf{Ejemplo de incumplimiento} \\
+\midrule
+\endhead
+Fidelidad al objetivo & Mantiene la gestión o comunica un cambio permitido. & Acepta una cita incompatible con una condición que no ha retirado. \\
+Coherencia & Sus mensajes y correcciones son compatibles. & Se contradice sobre una restricción sin reconocer el cambio. \\
+Información permitida & Usa solo hechos que puede conocer y propuestas visibles. & Cita una operación o identificador oculto en el estado interno. \\
+Ausencia de invención & No añade circunstancias que alteran el caso. & Inventa una cita previa o una autorización para continuar. \\
+Confirmaciones correctas & Acepta, rechaza o aplaza según propuesta e intención expresas. & Confirma un recurso distinto del que la conversación permite seleccionar. \\
+\bottomrule
+\end{longtable}
+
+Una corrección expresa no es incoherencia por sí sola. Tampoco se penaliza que
+el usuario rehúse una operación permitida. En cada nota se explica si el defecto
+impide cumplir la dimensión, la afecta de forma importante o deja una conducta
+utilizable. El éxito del asistente no sustituye esa revisión.
+
+\section{Aplicabilidad y evidencia}
+
+\texttt{NA} significa que el caso no ofrece oportunidad para observar una
+dimensión. Nunca se transforma en 0 ni en 3. Una sola respuesta sin intercambio
+previo no permite evaluar continuidad. Una consulta de lectura seguida de un
+agradecimiento no ofrece una confirmación que puntuar. En cambio, \enquote{no quiero
+cancelar} permite revisar si el simulador rechaza correctamente la operación.
+
+En cada pasada, cada episodio se revisa una sola vez, con la conversación y los
+efectos observados en la agenda a la vista. Anunciar \enquote{he reservado} no demuestra la
+escritura: el anuncio se contrasta con esos efectos y, si la reserva no
+aparece, respuesta administrativa y fidelidad material reciben 0. Si un juez
+no devuelve una respuesta válida, el episodio se registra como incidente del
+jurado y no recibe ninguna nota.
+
+El éxito material de la gestión no se decide con esta escala. Lo determina el
+oráculo determinista a partir del estado final de la agenda
+(capítulo~\ref{chap:metodologia-evaluacion}), y ninguna nota de 0 a 3 lo
+modifica.

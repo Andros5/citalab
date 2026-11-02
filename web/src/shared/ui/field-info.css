@@ -1,0 +1,34 @@
+.field-info {
+  margin-bottom: 0.5rem;
+}
+.field-info-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 32px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--brand);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 0.4rem;
+}
+.field-info-content {
+  font-weight: 400;
+  background: var(--wash);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--brand);
+  border-radius: 0.4rem;
+  padding: 0.8rem 1rem;
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.field-info-content p {
+  margin: 0;
+}
+.field-info-content p + p {
+  margin-top: 0.5rem;
+  color: var(--muted);
+}

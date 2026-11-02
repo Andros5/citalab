@@ -1,0 +1,228 @@
+\chapter{Conclusiones y trabajo futuro}
+\label{chap:conclusiones}
+
+\section{Conclusiones}
+
+En este trabajo se ha desarrollado un asistente para gestionar citas sanitarias
+en un entorno simulado. Las tres arquitecturas permiten consultar, reservar,
+reprogramar y cancelar citas, y configurar recordatorios sin enviarlos
+realmente. Todas comparten los mismos controles de identidad, representación,
+confirmación y escritura sobre una agenda basada en un subconjunto de FHIR R4.
+
+La personalización usa las preferencias autorizadas para ordenar las opciones
+disponibles y adaptar las respuestas. La persona puede corregir lo que ha
+pedido o pedir que no se use su perfil. Ninguna preferencia da permisos ni crea
+huecos nuevos. CitaLab permite conversar con cada variante y revisar las
+llamadas, las decisiones de política y las operaciones realizadas.
+
+La evaluación de 276 episodios con dos modelos no muestra una ventaja clara ni
+estadísticamente significativa de la arquitectura multiagente. Con Groq, M5
+obtiene la misma tasa de éxito que H y una algo mayor que S1 (43 frente a 42 de
+46, aunque una de las unidades a su favor es un falso positivo del oráculo), y
+con Gemini queda por debajo de S1 (43 frente a 46). En cambio, su coste es
+mayor con los dos modelos: hace el doble de llamadas, usa de media unas 2,4
+veces los tokens de H y tiene el mayor tiempo de inferencia
+(Tablas~\ref{tab:resultados-config} y~\ref{tab:coste}, y
+Figura~\ref{fig:coste-exito}). Al reunir los dos
+modelos, H obtiene notas de calidad iguales o superiores a las de M5 en las
+seis dimensiones, tanto en la revisión humana como en el jurado
+(Tabla~\ref{tab:calidad}). Por tanto, en estas gestiones la complejidad añadida
+no compensa su coste. La explicación más probable, a falta de una ablación, es
+que los pasos decisivos (interpretar la petición y actualizar la tarea) son
+comunes a M5 y H, y que los roles adicionales actúan después de ellos
+(apartado~\ref{sec:discusion-coste}).
+
+Las comprobaciones de seguridad del oráculo no detectaron ningún incumplimiento
+en los 276 episodios: ninguna escritura se hizo sin confirmación, las citas de otras personas no cambiaron y no hubo
+cambios en otras citas. En cambio, la comprobación de la redacción protege la
+veracidad menos de lo que parece, ya que de los 32 borradores que sustituyó por
+posibles anuncios solo tres anunciaban o prometían un efecto que no existía.
+Además, que la confirmación sea correcta no garantiza que se haga lo que la
+persona quería. En nueve episodios, una petición ambigua se convirtió en una
+reserva nueva, propuesta con claridad, aceptada y autorizada, cuando la persona
+quería mover su cita (apartado~\ref{sec:discusion-intencion}). Es decir, los
+controles protegen la agenda, pero no garantizan que se entienda bien lo que se
+pide.
+
+La calidad depende de todos los pasos que van de la petición a la respuesta.
+Hubo errores en la interpretación, en la actualización del estado, en los
+valores por defecto de las herramientas, en las instrucciones que construye el
+código, en la redacción y en los textos fijos
+(apartado~\ref{sec:discusion-cadena}). Un ejemplo es la personalización con
+Groq. El asistente ordenó bien los huecos según el perfil, pero como no explicó
+el orden, el usuario simulado, que no conocía su preferencia, eligió otra
+opción. Para personalizar no basta con ordenar bien, también hay que explicar
+por qué se ofrece primero una opción.
+
+El estudio de casos muestra además que varios fallos que parecían de
+comprensión del modelo venían en realidad del código que lo rodea. S1 respondía
+en español a quien escribía en inglés porque su código le indicaba ese idioma,
+y con la corrección respondió en inglés en los doce primeros turnos probados con
+cada modelo. El filtro arrastrado y la consulta que no encontraba citas se
+corrigen cambiando pocas líneas, y una indicación en la redacción bastó para
+que Groq mantuviera la explicación del orden en las doce pruebas. En cambio, la
+confusión entre cambiar una cita y reservar otra no se resuelve solo con
+instrucciones. Una indicación al agente de contexto la corrigió con Gemini,
+pero con Groq solo en una de cinco repeticiones
+(apartado~\ref{sec:discusion-correcciones}).
+
+Combinar varios instrumentos de evaluación ha sido imprescindible, porque cada
+uno detectó algo que los demás no veían. El oráculo encontró fallos en los que
+el usuario simulado terminó satisfecho. El jurado distinguió esos fallos casi
+sin error y detectó un falso éxito que el oráculo dio por bueno. Las trazas
+permitieron encontrar la causa de cada fallo. El jurado de dos LLM coincide de
+forma moderada o buena con la revisión humana y es algo más severo
+(Tabla~\ref{tab:juez-concordancia}). La estimación con PPI++, que se había
+previsto como principal, se descartó porque la muestra revisada no representa
+toda la campaña.
+
+\section{Grado de cumplimiento de los objetivos}
+
+Los objetivos del capítulo~\ref{chap:introduccion} se han cumplido dentro del
+alcance de laboratorio:
+
+\begin{enumerate}
+  \item Se han modelado el dominio de citas y las cinco gestiones, con sus
+        estados, propuestas y confirmaciones
+        (capítulo~\ref{chap:dominio-regulado}).
+  \item Los requisitos del RGPD, del Reglamento de IA y de la Ley 41/2002 se
+        han convertido en reglas del motor de políticas y en pruebas técnicas,
+        que se superan en la versión evaluada
+        (Apéndice~\ref{app:requisitos-normativos}). Esto no equivale a un
+        cumplimiento jurídico de un despliegue.
+  \item Se han definido las responsabilidades, los contratos y las rutas de
+        escalado de los cinco componentes de M5
+        (capítulo~\ref{chap:diseno}).
+  \item El simulador utiliza datos sintéticos y un subconjunto de recursos de
+        FHIR R4 (capítulo~\ref{chap:implementacion}).
+  \item Las tres variantes comparten herramientas y controles y difieren solo
+        en cómo toman las decisiones semánticas
+        (capítulos~\ref{chap:diseno} y~\ref{chap:implementacion}).
+  \item Se han medido el éxito integral de extremo a extremo, la seguridad
+        funcional, el cumplimiento de los controles, el uso de preferencias, la
+        calidad de la conversación, el tiempo de inferencia y el consumo en una
+        campaña completa con dos modelos (capítulo~\ref{chap:resultados}).
+  \item El código, los escenarios, los manifiestos de la campaña, las
+        evaluaciones y los programas que generan las tablas y repiten las
+        comprobaciones están publicados en
+        \url{https://github.com/Andros5/citalab} para repetir el análisis
+        (apartado~\ref{sec:metodo-ejecucion}).
+\end{enumerate}
+
+Las comparaciones no permiten afirmar que una arquitectura tenga más éxito que
+otra, un resultado que ya se contemplaba como posible en el
+capítulo~\ref{chap:metodologia-evaluacion}.
+
+\section{Limitaciones}
+
+El corpus contiene conversaciones sintéticas escritas a partir de gestiones
+conocidas. Aunque es distinto del que se usó para el ajuste, comparte sus
+categorías y capacidades. El usuario simulado es otro modelo de lenguaje, más
+cooperativo que una persona real. Aceptó operaciones que no correspondían a su
+objetivo y, como no conocía su preferencia horaria, su elección dependió de
+cómo se presentaban las opciones. Las agendas solo ofrecen citas presenciales y
+no reproducen la complejidad de un centro sanitario.
+
+Las familias y sus contrastes comparten información, lo que limita el número
+de observaciones independientes y la capacidad de detectar diferencias
+pequeñas. La revisión humana se ha hecho sin revisores externos y cubre una
+muestra de 60 episodios de la primera ejecución, ninguno de ellos fallido. Por todo
+ello, no se establece una clasificación definitiva de las arquitecturas ni se
+pueden sacar conclusiones sobre la satisfacción de pacientes, la seguridad
+clínica o el cumplimiento jurídico de un despliegue real.
+
+El oráculo tampoco comprueba de forma exhaustiva el alcance administrativo del
+discurso. El caso N-B05 incluye recomendaciones clínicas pese a obtener un
+resultado automático satisfactorio (apartado~\ref{sec:limite-alcance-clinico}).
+Por tanto, superar las comprobaciones materiales no equivale a respetar todos
+los límites de la respuesta.
+
+\section{Trabajo futuro}
+
+\subsection{Mejoras del asistente}
+
+Los errores observados indican las primeras mejoras del asistente, varias de
+ellas ya probadas sin repetir la campaña (apartado~\ref{sec:discusion-correcciones}):
+
+\begin{itemize}
+  \item Detectar en S1 el idioma de cada mensaje, como ya hacen M5 y H.
+  \item Distinguir en el estado de la conversación entre \enquote{sin cambios}
+        y \enquote{sin filtro}, y hacer explícitos los valores por defecto de
+        las herramientas.
+  \item Mantener la explicación del orden de las opciones, con una indicación
+        en la redacción o como texto fijo, y adaptar los textos fijos al
+        tratamiento y al idioma del perfil.
+  \item Sustituir la comprobación léxica de anuncios por un contraste con las
+        citas y la propuesta del estado, que cubra también las promesas en
+        futuro.
+  \item Preguntar antes de proponer cuando una petición pueda ser una reserva
+        nueva o el cambio de una cita existente del mismo servicio, teniendo en
+        cuenta lo que dice el mensaje y no solo el servicio.
+\end{itemize}
+
+\subsection{Mejoras de la evaluación}
+
+Para separar los factores que esta campaña no aísla, haría falta un estudio de
+ablación con variantes concretas: M5 sin el agente de perfiles, S1 con la
+consulta del perfil obligatoria desde el código, H sin el paso de redacción y
+M5 con un agente de contexto distinto del de H. Estas variantes permitirían
+comprobar las hipótesis del apartado~\ref{sec:discusion-coste}.
+
+También sería útil probar los propios instrumentos con
+episodios en los que se introducen errores conocidos (una reserva duplicada,
+una promesa en futuro, un filtro arrastrado), para medir qué detectan el
+oráculo, el jurado y el simulador \citep{doddapaneni2024fbi}. Una muestra
+humana estratificada por bloque y por resultado del oráculo permitiría usar
+PPI++ con garantías \citep{fisch2024stratifiedppi}. El usuario simulado
+debería recibir también las preferencias de la persona que representa, con la
+indicación de no decirlas si no se las preguntan, para que su elección refleje
+lo que quiere y no solo lo que le explica el asistente.
+
+\subsection{Hacia una puesta en producción}
+
+CitaLab se ha evaluado en un laboratorio, con datos sintéticos y un usuario
+simulado. Antes de ponerlo en producción habría que comprobar que funciona con
+personas reales y que cumple los requisitos de un servicio sanitario. Estos
+serían los pasos, en orden:
+
+\begin{enumerate}
+  \item \textbf{Estudio con usuarios reales.} Probar el asistente con
+        pacientes, acompañantes y personal administrativo, usando perfiles
+        sintéticos y con consentimiento informado. Además del éxito de cada
+        gestión, se mediría la satisfacción y la facilidad de uso, con especial
+        atención a las personas mayores o con poca alfabetización digital
+        \citep{vandervaart2017dhl}, y se seguirían pautas de accesibilidad
+        cognitiva \citep{w3c2021coga}.
+  \item \textbf{Revisión independiente.} Varios revisores ajenos al
+        desarrollo, a ser posible con experiencia en la gestión de citas,
+        puntuarían las conversaciones con la misma rúbrica. Así se mediría el
+        acuerdo entre revisores y se validaría el jurado también en los
+        episodios fallidos.
+  \item \textbf{Integración con sistemas reales.} Conectar el asistente con la
+        agenda de un servicio de salud mediante una API FHIR, con
+        identificación electrónica de las personas y comprobación real de la
+        representación. Esto obligaría a revisar los permisos, la autenticación
+        y la concurrencia, y a cumplir los esquemas nacionales de seguridad e
+        interoperabilidad \citep{es2022rd311ens,es2010rd4eni}. En esta fase se
+        podrían añadir las citas telefónicas o por videoconsulta y el envío
+        real de los recordatorios.
+  \item \textbf{Protección de datos y seguridad.} Con datos reales haría falta
+        una evaluación de impacto en protección de datos \citep{eu2016gdpr} y
+        decidir dónde se ejecutan los modelos. GPT-OSS 20B es un modelo
+        abierto y podría ejecutarse en servidores propios, de modo que los
+        datos no saldrían de la organización. También habría que probar la
+        resistencia del asistente a instrucciones maliciosas incluidas en los
+        mensajes o en los datos que recibe \citep{debenedetti2024agentdojo}.
+  \item \textbf{Piloto y seguimiento.} Empezar por un centro y por las
+        gestiones de menos riesgo, como consultar citas o configurar
+        recordatorios, y derivar al personal administrativo lo que el asistente
+        no pueda resolver. Durante el piloto se conservarían las trazas y se
+        aplicarían el oráculo y el jurado a conversaciones reales anonimizadas,
+        para detectar errores nuevos y cambios de comportamiento cuando se
+        actualice un modelo.
+\end{enumerate}
+
+Si estos pasos salen bien, el asistente podría ampliarse a otros canales, como
+el teléfono o la mensajería, con entrada por voz y en más idiomas, y a otras
+gestiones administrativas. Cada ampliación tendría que evaluarse de nuevo con el
+mismo método antes de ofrecerse a los usuarios.

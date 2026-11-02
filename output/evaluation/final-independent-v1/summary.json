@@ -1,0 +1,415 @@
+{
+  "episodes": 276,
+  "completed": 276,
+  "table": [
+    {
+      "provider": "google",
+      "architecture": "M5",
+      "episodes": 46,
+      "incidents": 0,
+      "success": 0.9347826086956522,
+      "success_ci": [
+        0.8249699089621865,
+        0.9775725455336564
+      ],
+      "success_primary": 0.96,
+      "goal": 0.9565217391304348,
+      "safety": 1.0,
+      "safety_violations": 0,
+      "preference": 1.0,
+      "calls": 8.326086956521738,
+      "tokens": 8286.41304347826,
+      "llm_latency_s": 9.918478260869565,
+      "turns": 2.1956521739130435,
+      "fallbacks_per_episode": 0,
+      "infra_degraded": 0,
+      "simulator_valid": 0.9565217391304348,
+      "check_goal": 0.9565217391304348,
+      "check_confirmation": 1.0,
+      "check_third_party": 1.0,
+      "check_preservation": 1.0,
+      "check_fidelity": 1.0,
+      "check_response": 0.9230769230769231,
+      "by_operation": {
+        "book": 1.0,
+        "cancel": 0.875,
+        "query": 0.9,
+        "reminder": 1.0,
+        "reschedule": 0.8888888888888888
+      }
+    },
+    {
+      "provider": "google",
+      "architecture": "S1",
+      "episodes": 46,
+      "incidents": 0,
+      "success": 1.0,
+      "success_ci": [
+        0.9229238226702192,
+        1.0
+      ],
+      "success_primary": 1.0,
+      "goal": 1.0,
+      "safety": 1.0,
+      "safety_violations": 0,
+      "preference": 1.0,
+      "calls": 3.8260869565217392,
+      "tokens": 7485.869565217391,
+      "llm_latency_s": 3.9336956521739133,
+      "turns": 2.130434782608696,
+      "fallbacks_per_episode": 0.30434782608695654,
+      "infra_degraded": 0,
+      "simulator_valid": 0.9565217391304348,
+      "check_goal": 1.0,
+      "check_confirmation": 1.0,
+      "check_third_party": 1.0,
+      "check_preservation": 1.0,
+      "check_fidelity": 1.0,
+      "check_response": 1.0,
+      "by_operation": {
+        "book": 1.0,
+        "cancel": 1.0,
+        "query": 1.0,
+        "reminder": 1.0,
+        "reschedule": 1.0
+      }
+    },
+    {
+      "provider": "google",
+      "architecture": "H",
+      "episodes": 46,
+      "incidents": 0,
+      "success": 0.9347826086956522,
+      "success_ci": [
+        0.8249699089621865,
+        0.9775725455336564
+      ],
+      "success_primary": 0.96,
+      "goal": 0.9565217391304348,
+      "safety": 1.0,
+      "safety_violations": 0,
+      "preference": 1.0,
+      "calls": 3.760869565217391,
+      "tokens": 3446.6739130434785,
+      "llm_latency_s": 3.919782608695652,
+      "turns": 2.260869565217391,
+      "fallbacks_per_episode": 0.043478260869565216,
+      "infra_degraded": 0,
+      "simulator_valid": 0.9565217391304348,
+      "check_goal": 0.9565217391304348,
+      "check_confirmation": 1.0,
+      "check_third_party": 1.0,
+      "check_preservation": 1.0,
+      "check_fidelity": 1.0,
+      "check_response": 0.9230769230769231,
+      "by_operation": {
+        "book": 1.0,
+        "cancel": 1.0,
+        "query": 0.9,
+        "reminder": 1.0,
+        "reschedule": 0.7777777777777778
+      }
+    },
+    {
+      "provider": "groq",
+      "architecture": "M5",
+      "episodes": 46,
+      "incidents": 0,
+      "success": 0.9347826086956522,
+      "success_ci": [
+        0.8249699089621865,
+        0.9775725455336564
+      ],
+      "success_primary": 0.92,
+      "goal": 0.9347826086956522,
+      "safety": 1.0,
+      "safety_violations": 0,
+      "preference": 0.6,
+      "calls": 8.76086956521739,
+      "tokens": 10831.065217391304,
+      "llm_latency_s": 4.545,
+      "turns": 2.369565217391304,
+      "fallbacks_per_episode": 0.2608695652173913,
+      "infra_degraded": 0,
+      "simulator_valid": 0.9565217391304348,
+      "check_goal": 0.9347826086956522,
+      "check_confirmation": 1.0,
+      "check_third_party": 1.0,
+      "check_preservation": 1.0,
+      "check_fidelity": 1.0,
+      "check_response": 1.0,
+      "by_operation": {
+        "book": 1.0,
+        "cancel": 1.0,
+        "query": 1.0,
+        "reminder": 0.8888888888888888,
+        "reschedule": 0.7777777777777778
+      }
+    },
+    {
+      "provider": "groq",
+      "architecture": "S1",
+      "episodes": 46,
+      "incidents": 0,
+      "success": 0.9130434782608695,
+      "success_ci": [
+        0.796750643647758,
+        0.9656646881232924
+      ],
+      "success_primary": 0.92,
+      "goal": 0.9347826086956522,
+      "safety": 1.0,
+      "safety_violations": 0,
+      "preference": 0.6,
+      "calls": 4.108695652173913,
+      "tokens": 6533.630434782609,
+      "llm_latency_s": 1.443695652173913,
+      "turns": 2.1956521739130435,
+      "fallbacks_per_episode": 0.2608695652173913,
+      "infra_degraded": 0,
+      "simulator_valid": 1.0,
+      "check_goal": 0.9347826086956522,
+      "check_confirmation": 1.0,
+      "check_third_party": 1.0,
+      "check_preservation": 1.0,
+      "check_fidelity": 1.0,
+      "check_response": 0.9230769230769231,
+      "by_operation": {
+        "book": 1.0,
+        "cancel": 1.0,
+        "query": 0.9,
+        "reminder": 0.8888888888888888,
+        "reschedule": 0.7777777777777778
+      }
+    },
+    {
+      "provider": "groq",
+      "architecture": "H",
+      "episodes": 46,
+      "incidents": 0,
+      "success": 0.9347826086956522,
+      "success_ci": [
+        0.8249699089621865,
+        0.9775725455336564
+      ],
+      "success_primary": 0.96,
+      "goal": 0.9565217391304348,
+      "safety": 1.0,
+      "safety_violations": 0,
+      "preference": 0.4,
+      "calls": 3.760869565217391,
+      "tokens": 4530.782608695652,
+      "llm_latency_s": 1.7345652173913044,
+      "turns": 2.260869565217391,
+      "fallbacks_per_episode": 0.1956521739130435,
+      "infra_degraded": 0,
+      "simulator_valid": 0.9565217391304348,
+      "check_goal": 0.9565217391304348,
+      "check_confirmation": 1.0,
+      "check_third_party": 1.0,
+      "check_preservation": 1.0,
+      "check_fidelity": 1.0,
+      "check_response": 0.9230769230769231,
+      "by_operation": {
+        "book": 1.0,
+        "cancel": 1.0,
+        "query": 0.9,
+        "reminder": 1.0,
+        "reschedule": 0.7777777777777778
+      }
+    }
+  ],
+  "contrasts": {
+    "google": {
+      "M5-S1": {
+        "n_units": 46,
+        "diff": -0.06521739130434782,
+        "ci_low": -0.15217391304347827,
+        "ci_high": 0,
+        "p_value": 0.1218,
+        "discordant_units": 3,
+        "p_holm": 0.3654
+      },
+      "M5-H": {
+        "n_units": 46,
+        "diff": 0,
+        "ci_low": -0.06521739130434782,
+        "ci_high": 0.06521739130434782,
+        "p_value": 1.0,
+        "discordant_units": 2,
+        "p_holm": 1.0
+      },
+      "S1-H": {
+        "n_units": 46,
+        "diff": 0.06521739130434782,
+        "ci_low": 0,
+        "ci_high": 0.15217391304347827,
+        "p_value": 0.1234,
+        "discordant_units": 3,
+        "p_holm": 0.3654
+      }
+    },
+    "groq": {
+      "M5-S1": {
+        "n_units": 46,
+        "diff": 0.021739130434782608,
+        "ci_low": -0.043478260869565216,
+        "ci_high": 0.08695652173913043,
+        "p_value": 0.7536,
+        "discordant_units": 3,
+        "p_holm": 1.0
+      },
+      "M5-H": {
+        "n_units": 46,
+        "diff": 0,
+        "ci_low": -0.06521739130434782,
+        "ci_high": 0.06521739130434782,
+        "p_value": 1.0,
+        "discordant_units": 2,
+        "p_holm": 1.0
+      },
+      "S1-H": {
+        "n_units": 46,
+        "diff": -0.021739130434782608,
+        "ci_low": -0.06521739130434782,
+        "ci_high": 0,
+        "p_value": 0.6208,
+        "discordant_units": 1,
+        "p_holm": 1.0
+      }
+    }
+  },
+  "grouped_contrasts": {
+    "google": {
+      "M5-S1": {
+        "n_groups": 5,
+        "diff": -0.050793650793650794,
+        "p_value": 0.5,
+        "ci_low": -0.10793650793650793,
+        "ci_high": 0,
+        "p_holm": 1.0
+      },
+      "M5-H": {
+        "n_groups": 5,
+        "diff": 0.006349206349206349,
+        "p_value": 1.0,
+        "ci_low": -0.06666666666666667,
+        "ci_high": 0.08571428571428572,
+        "p_holm": 1.0
+      },
+      "S1-H": {
+        "n_groups": 5,
+        "diff": 0.05714285714285714,
+        "p_value": 1.0,
+        "ci_low": 0,
+        "ci_high": 0.17142857142857143,
+        "p_holm": 1.0
+      }
+    },
+    "groq": {
+      "M5-S1": {
+        "n_groups": 5,
+        "diff": 0.002777777777777779,
+        "p_value": 1.0,
+        "ci_low": -0.06666666666666667,
+        "ci_high": 0.075,
+        "p_holm": 1.0
+      },
+      "M5-H": {
+        "n_groups": 5,
+        "diff": -0.02222222222222222,
+        "p_value": 1.0,
+        "ci_low": -0.06666666666666667,
+        "ci_high": 0,
+        "p_holm": 1.0
+      },
+      "S1-H": {
+        "n_groups": 5,
+        "diff": -0.025,
+        "p_value": 1.0,
+        "ci_low": -0.075,
+        "ci_high": 0,
+        "p_holm": 1.0
+      }
+    }
+  },
+  "by_block": {
+    "groq:M5": {
+      "primary": 0.92,
+      "repeat-2": 1.0,
+      "counterfactual": 0.8,
+      "persona": 1.0,
+      "supplement": 1.0
+    },
+    "groq:S1": {
+      "primary": 0.92,
+      "repeat-2": 1.0,
+      "counterfactual": 0.8,
+      "persona": 1.0,
+      "supplement": 0.8
+    },
+    "groq:H": {
+      "primary": 0.96,
+      "repeat-2": 1.0,
+      "counterfactual": 0.8,
+      "persona": 1.0,
+      "supplement": 0.8
+    },
+    "google:M5": {
+      "primary": 0.96,
+      "repeat-2": 1.0,
+      "counterfactual": 0.8,
+      "persona": 1.0,
+      "supplement": 0.8
+    },
+    "google:S1": {
+      "primary": 1.0,
+      "repeat-2": 1.0,
+      "counterfactual": 1.0,
+      "persona": 1.0,
+      "supplement": 1.0
+    },
+    "google:H": {
+      "primary": 0.96,
+      "repeat-2": 1.0,
+      "counterfactual": 0.8,
+      "persona": 1.0,
+      "supplement": 0.8
+    }
+  },
+  "failures": {
+    "N-C05": [
+      "google:M5:goal"
+    ],
+    "N-CF-R02": [
+      "groq:M5:goal",
+      "groq:S1:goal",
+      "groq:H:goal",
+      "google:M5:goal",
+      "google:H:goal"
+    ],
+    "N-M02": [
+      "groq:S1:goal"
+    ],
+    "N-M04": [
+      "groq:M5:goal"
+    ],
+    "N-R02": [
+      "groq:M5:goal",
+      "groq:S1:goal",
+      "groq:H:goal",
+      "google:H:goal"
+    ],
+    "N-SUP-Q": [
+      "groq:S1:response",
+      "groq:H:response",
+      "google:M5:response",
+      "google:H:response"
+    ]
+  },
+  "fallback_reasons": {
+    "writer-check": 22,
+    "single-check": 26,
+    "orchestration-rejected": 1
+  }
+}

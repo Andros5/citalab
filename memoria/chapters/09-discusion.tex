@@ -1,0 +1,392 @@
+\chapter{Discusión y amenazas a la validez}
+\label{chap:discusion}
+
+Este capítulo interpreta los resultados del capítulo~\ref{chap:resultados}.
+Primero se presentan cuatro ideas principales que se extraen de la campaña y
+que afectan a varias preguntas de investigación. Después se proponen
+correcciones para los fallos del estudio de casos, comprobadas sin repetir la
+campaña. Por último, una tabla resume qué se puede concluir sobre cada pregunta
+y se analizan las amenazas a la validez. Las conclusiones se limitan al corpus
+sintético, a los dos modelos y a las gestiones estudiadas. Cuando la traza o el
+código no demuestran una explicación, esta se presenta como hipótesis.
+
+\section{Coste de la arquitectura multiagente}
+\label{sec:discusion-coste}
+
+M5 no muestra una ventaja de éxito clara ni estadísticamente significativa. Con
+Groq obtiene una tasa algo mayor que S1 (43 frente a 42 de 46 episodios), pero
+igual que H, y con Gemini queda por debajo de S1 (43 frente a 46). En cambio,
+su coste es mayor con los dos modelos: hace el doble de llamadas, usa unas 2,4
+veces los tokens medios de H y tiene el mayor tiempo de inferencia. Tampoco
+mejora la calidad. Al reunir los dos modelos, H obtiene notas iguales o
+superiores a M5 en las seis dimensiones del asistente, tanto en la revisión
+humana como en el jurado. Por tanto, H consigue el mismo éxito que M5 con algo
+más del 40\,\% de sus tokens. La mejor combinación observada es Gemini con S1,
+que resuelve los 46 episodios con un consumo medio menor que el de M5
+(Figura~\ref{fig:coste-exito}).
+
+La explicación más probable está en dónde se producen los fallos. De los 13
+fallos de los dos patrones principales, diez ocurren en M5 o H y se originan en
+componentes que comparten las dos arquitecturas: el agente de contexto, que
+interpreta la petición, y el código que actualiza la tarea. Los tres roles que
+M5 añade sobre H (cumplimiento, perfiles y orquestación) actúan después de esos
+pasos y no corrigieron los errores. Es decir, los agentes adicionales trabajan
+en pasos que no eran los que fallaban. Este resultado coincide con los límites
+de la coordinación en tareas secuenciales que describen
+\citet{kim2026scalingagents}, con trabajos en los que un agente único con
+buenas instrucciones se acerca a los sistemas de varios agentes
+\citep{wang2024multiagentdiscussion} y con la observación de que la ventaja de
+estos sistemas disminuye a medida que mejoran los modelos
+\citep{gao2025singlemulti}.
+
+La única ventaja que se podría atribuir a tener agentes especializados es la
+mejor adecuación al perfil frente a S1, y el estudio de casos la explica en
+gran parte de otra forma. En la muestra humana, la nota más baja de S1 se
+concentra en los seis episodios en inglés (2,0 frente a 2,43 en español), en
+los que respondió en español. En los episodios en español, las tres
+arquitecturas quedan entre 2,43 y 2,71. Ese defecto no se debe a tener un solo
+agente, sino a que el código de S1 no detecta el idioma del mensaje, y
+desaparece al corregirlo (apartado~\ref{sec:discusion-correcciones}). Sí queda
+una diferencia demostrada en la consulta del perfil. M5 y H la hacen desde el
+código cuando la gestión lo requiere, mientras que en S1 es el modelo quien
+decide si llama a la herramienta, y con Groq lo hizo en tres de siete
+episodios. Por tanto, si hay una ventaja, depende más de quién decide consultar
+el perfil que del número de agentes. Sin una ablación que aísle cada factor
+esto sigue siendo una hipótesis, porque entre las arquitecturas también cambian
+las instrucciones, los contratos y los flujos.
+
+Estas conclusiones no se pueden generalizar a todos los sistemas multiagente.
+Se refieren a gestiones cortas y secuenciales, con dos modelos de bajo coste y
+una arquitectura M5 concreta. En tareas con más trabajo en paralelo, más
+información que coordinar o más ambigüedad, los agentes especializados podrían
+compensar su coste.
+
+\section{Confirmación e intención de la persona}
+\label{sec:discusion-intencion}
+
+En los nueve fallos de reprogramación, cada paso es correcto por separado. La
+petición es ambigua, el asistente la interpreta como una reserva, propone una
+cita nueva y lo dice claramente, el usuario simulado la acepta, la confirmación
+autoriza la escritura y la agenda termina con dos citas del mismo servicio. Los
+controles funcionaron y, aun así, la gestión no hizo lo que la persona quería.
+
+Aquí hay que distinguir tres propiedades que a menudo se confunden. La primera
+es la autorización: cada escritura debe responder a la confirmación expresa de
+una propuesta visible, y esto se cumplió en los 276 episodios. La segunda es la
+veracidad: lo que se dice debe coincidir con lo que se hace, y también se
+cumplió en esos nueve casos, porque la propuesta presentaba una reserva. La
+tercera es cumplir la intención de la persona, y es la que falló. Los controles
+de CitaLab protegen la primera y en parte la segunda, pero no pueden garantizar
+la tercera, porque depende de cómo se interprete la petición. En la primera, el
+límite está en la confirmación por texto, que se comprueba de forma léxica
+(apartado~\ref{sec:diseno-confirmacion}), aunque en la campaña todas las
+escrituras se confirmaron con el botón.
+
+La comprobación de la redacción protege la veracidad menos de lo que parece
+por el número de veces que actuó. Sustituyó 32 borradores por posibles
+anuncios, pero solo tres anunciaban o prometían un efecto que no existía. Casi
+todas las demás sustituciones afectaron a respuestas correctas que describían
+una cita existente. Además, dejó pasar una promesa en N-M04 y, en N-SUP-Q, su
+texto de respaldo provocó un falso éxito (apartado~\ref{sec:caso-red}). Una
+comprobación léxica no distingue la descripción de una cita que existe del
+anuncio de una que no existe, y tampoco detecta las promesas en futuro.
+
+El caso N-M04 deja además una idea útil para el diseño
+(apartado~\ref{sec:caso-dos-desenlaces}). Con la misma interpretación errónea,
+el texto fijo de H respondió de forma seca que no había nada que confirmar, y
+eso hizo que la persona insistiera hasta que la gestión se resolvió. La
+redacción de M5, más natural, prometió algo que no iba a ocurrir y la
+conversación terminó ahí. Cuando el sistema no puede hacer lo que se le pide,
+es más seguro un texto fijo que diga la verdad que una respuesta bien redactada
+pero falsa.
+
+La solución no es convertir automáticamente en un cambio cualquier segunda
+reserva del mismo servicio, porque una persona puede necesitar dos citas. Lo
+adecuado es detectar cuándo la petición es ambigua y un error tendría
+consecuencias en la agenda, y preguntar antes de proponer solo en esos casos
+\citep{zhang2025clarify}. Como se verá en el
+apartado~\ref{sec:discusion-correcciones}, una regla basada solo en el servicio
+preguntaría en la mayoría de las reservas legítimas, así que la pregunta debe
+tener en cuenta también lo que dice el mensaje.
+
+\section{Origen de los errores}
+\label{sec:discusion-cadena}
+
+Los errores observados no están en un solo componente, sino repartidos por
+todos los pasos que van de la petición a la respuesta:
+
+\begin{itemize}
+  \item \textbf{Interpretación.} La reprogramación tratada como reserva, el
+  recordatorio leído como una consulta y la cancelación propuesta antes de
+  mostrar las citas.
+  \item \textbf{Actualización del estado.} El filtro de enfermería se conservó
+  porque un campo vacío de la interpretación significa \enquote{sin cambios}.
+  \item \textbf{Contratos de las herramientas.} Una fecha inicial sin fecha
+  final se interpreta como un único día.
+  \item \textbf{Instrucciones construidas por el código.} S1 recibía el
+  español como estilo preferido en los episodios en inglés.
+  \item \textbf{Redacción.} La frase que explicaba el orden por la preferencia
+  se perdió en ocho de diez mensajes de Groq.
+  \item \textbf{Plantillas y respaldos.} Las frases fijas de confirmación
+  tutean, y el texto de respaldo expuso identificadores internos.
+\end{itemize}
+
+Tres de estos errores parecen del modelo, pero no lo son: el campo vacío que
+mantiene el filtro, la fecha final que falta y reduce la consulta a un día, y
+el idioma que S1 nunca actualiza. Son errores en la conexión entre componentes,
+causados por valores por defecto que no están explícitos, y añadir agentes no
+los elimina. M5 añade roles sobre la misma interpretación y el mismo código de
+estado que H, así que tiene sus mismos errores y, además, más puntos de
+conexión en los que puede aparecer uno nuevo.
+
+El caso de las preferencias muestra que también importa lo que se comunica. Con
+Groq, el asistente aplicó la preferencia al ordenar los huecos, pero como no
+explicó el orden, el usuario simulado eligió otra opción. Personalizar no es
+solo ordenar bien las opciones, sino también decir por qué se ofrece una en
+primer lugar. La literatura sobre sistemas de recomendación distingue entre que
+una explicación ayude a decidir bien y que simplemente convenza, y recomienda
+evaluar las dos cosas \citep{tintarev2012explanations}. Además, este efecto se
+ha observado con un usuario simulado que no conocía su preferencia, y una
+persona real que sí la conoce podría reaccionar de otra forma, así que es una
+hipótesis que habría que comprobar con usuarios.
+
+De aquí salen dos recomendaciones de diseño. La primera es que las
+comprobaciones de la redacción cubran los datos del plan que pueden cambiar la
+decisión de la persona, y no solo las horas y la pregunta. La segunda es que los
+contratos de las herramientas y del estado hagan explícitos sus valores por
+defecto, por ejemplo distinguiendo entre \enquote{sin cambios} y \enquote{sin
+filtro}. En el apartado~\ref{sec:discusion-correcciones} se concretan y se
+comprueban estas correcciones.
+
+\section{Límites de los instrumentos de evaluación}
+\label{sec:discusion-evaluacion}
+
+Cada instrumento de evaluación tiene cosas que no ve, y en la campaña hay
+ejemplos de todos. La Tabla~\ref{tab:instrumentos} resume qué detectó y
+qué no detectó cada uno.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Lo que detectó cada instrumento de evaluación.]{Lo que detectó y lo
+que no detectó cada instrumento de evaluación en la campaña final.}
+\label{tab:instrumentos}
+\begin{tabularx}{\textwidth}{L{0.17\textwidth}YY}
+\toprule
+\textbf{Instrumento} & \textbf{Detectó} & \textbf{No detectó} \\
+\midrule
+Oráculo sobre la agenda & Los 16 fallos, incluidos los once que terminaron con el simulador satisfecho. & Un listado incompleto que dio por bueno, la promesa en futuro de N-M04, afirmaciones falsas sobre información y las recomendaciones clínicas de N-B05. \\
+Comprobación de la redacción & Tres borradores que anunciaban o prometían un efecto inexistente. & Sustituyó 27 respuestas correctas y dejó pasar la promesa del segundo mensaje de N-M04. \\
+Usuario simulado y sus comprobaciones & Diez episodios propios inválidos y la discrepancia entre lo que creía y lo que ocurrió. & Las nueve reservas que no correspondían a su objetivo. Además terminó una conversación al corregir y eligió según la explicación del orden. \\
+Jurado LLM & Separó fallos y éxitos (AUC de 0,99), detectó el listado incompleto y 13 éxitos con defectos. & Su concordancia con la revisión humana no se midió en episodios fallidos. Es más severo que esa revisión. \\
+Revisión humana & Defectos de tratamiento, idioma y datos internos en la muestra. & Lo que queda fuera de una muestra pequeña, sin fallos ni casos nuevos. \\
+Trazas y código & El mecanismo de cada fallo. & Por sí solos, si la gestión cumplió la intención de la persona. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El usuario simulado es el componente menos controlado. Aceptó las nueve
+reservas equivocadas, lo que coincide con trabajos que muestran que los
+simuladores basados en LLM son demasiado cooperativos y valoran la conversación
+mejor que las personas \citep{zhou2026sim2real}. Un simulador más exigente
+habría protestado durante la conversación y quizá habría permitido corregir los
+fallos, así que las tasas de éxito también dependen de él.
+
+El oráculo es la referencia más fiable para los efectos en la agenda, pero sus
+comprobaciones de respuesta y de fidelidad son léxicas. Dio por bueno un
+listado incompleto porque buscaba las horas en toda la conversación. Además,
+la adherencia a preferencias atribuye al asistente una elección que, en los
+episodios con lista de huecos, hizo el simulador.
+
+El caso N-B05 añade otro límite (apartado~\ref{sec:limite-alcance-clinico}).
+Negarse a dar consejo médico en una frase no basta si el resto de la respuesta
+lo proporciona. Ni la operación correcta sobre la agenda ni la presencia de
+una expresión de rechazo prueban que el diálogo respete su finalidad
+administrativa. Esta propiedad requiere una revisión del mensaje completo,
+distinta de las comprobaciones de autorización y de efectos materiales.
+
+La concordancia del jurado con la revisión humana es moderada o buena, pero se
+midió en una muestra sin fallos y con muy poca variación en las dimensiones del
+simulador. La comparación con el oráculo completa lo que faltaba, porque el
+jurado dio un 1 o menos en respuesta administrativa a todos los fallos. Otros
+trabajos muestran que los jueces LLM pueden pasar por alto errores
+introducidos a propósito \citep{doddapaneni2024fbi}, así que este tipo de
+comprobación es necesaria y no se puede dar por hecha en otros dominios.
+
+La estimación con PPI++ prevista en el protocolo muestra el riesgo de combinar
+instrumentos sin comprobar sus supuestos. Calculada con la muestra disponible,
+daba a M5 una ventaja sobre S1 en adecuación al perfil (2,65 frente a 2,36,
+agrupando los dos modelos) que el jurado no confirma en el conjunto de la
+campaña (2,33 frente a 2,30). La estimación heredaba la diferencia de las notas
+humanas, porque la muestra se tomó solo de la primera ejecución y no contiene
+fallos, mientras que la estimación se extiende a todos los bloques. Una muestra
+estratificada por bloque y por resultado del oráculo, como proponen
+\citet{fisch2024stratifiedppi}, permitiría usar PPI++ con garantías.
+
+En resumen, la evaluación de un asistente también es un sistema con
+componentes que pueden fallar, y para que sea válida hay que contrastarlos
+entre sí. En esta campaña, cada instrumento detectó algo que los demás no
+veían.
+
+\section{Correcciones propuestas}
+\label{sec:discusion-correcciones}
+
+El estudio de casos permite pasar de encontrar los fallos a corregirlos. Para
+comprobar las correcciones sin repetir la campaña, después de ella se hicieron
+dos tipos de pruebas que no modifican los resultados del
+capítulo~\ref{chap:resultados}. La primera repite sin llamar a ningún modelo el
+paso que falló: toma de las trazas la interpretación o los argumentos
+registrados y ejecuta tanto el código evaluado como una versión corregida. La
+segunda repite ese paso con los mismos modelos, temperatura e instrucciones,
+con y sin la corrección. Para ello se hicieron 178 llamadas (77 a Gemini y 101
+a Groq), que sumaron unos 288\,000 tokens. Las dos pruebas comprueban el paso
+que falló, pero no lo que habría pasado después en la conversación, y se
+repitieron pocas veces. La Tabla~\ref{tab:correcciones} resume las correcciones
+y la Tabla~\ref{tab:comprobaciones}, los resultados con los modelos.
+
+\begin{table}[!htbp]
+\centering
+\footnotesize
+\caption[Correcciones propuestas y su comprobación.]{Correcciones propuestas
+para los fallos del estudio de casos y resultado de su comprobación.}
+\label{tab:correcciones}
+\begin{tabularx}{\textwidth}{L{0.18\textwidth}YL{0.15\textwidth}Y}
+\toprule
+\textbf{Fallo} & \textbf{Corrección} & \textbf{Componente} & \textbf{Comprobación} \\
+\midrule
+Filtro arrastrado (\ref{sec:caso-filtro}) & Una consulta nueva no hereda los filtros de la anterior. & Actualización de la tarea (M5 y H) & Sin modelos: 3 citas en lugar de 1 en los 4 episodios. \\
+Consulta sin citas (\ref{sec:caso-sin-citas}) & Una fecha final ausente significa sin límite. & Herramienta de consulta & Sin modelos: 3 citas en lugar de 0. \\
+Idioma de S1 (\ref{sec:caso-idioma}) & Detectar el idioma del mensaje, como ya hacen M5 y H. & Estado de S1 & Con modelos: primer turno en inglés en 12 de 12 casos con los dos modelos. \\
+Explicación del orden (\ref{sec:caso-explicacion}) & Pedir en las instrucciones que se conserve, o añadirla como texto fijo. & Redacción & Con Groq: conservada en 12 de 12 redacciones, frente a ninguna. \\
+\enquote{Otra hora} (\ref{sec:caso-otra-hora}) & Indicar en el agente de contexto cuándo \enquote{otra hora} es un cambio. & Interpretación & Con modelos: cambio en 5 de 5 con Gemini y en 1 de 5 con Groq. Sin falsos cambios en 16 controles. \\
+\enquote{Otra hora}, alternativa & Preguntar antes de reservar un servicio con una cita pendiente. & Código, antes de proponer & Sin modelos: preguntaría en los 9 fallos y en 48 de las 60 reservas legítimas. \\
+Comprobación de anuncios (\ref{sec:caso-red}) & Contrastar el texto con las citas y la propuesta reales, y cubrir las promesas. & Comprobación de la redacción & No comprobada. Los 32 borradores ya clasificados servirían como conjunto de prueba. \\
+Tuteo en textos fijos (\ref{sec:resultados-errores}) & Variantes de las frases fijas con usted. & Plantillas & Sin comprobar. Basta una prueba sin modelos. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Comprobaciones con los modelos.]{Comprobaciones con los modelos
+posteriores a la campaña. El idioma se mide en los doce primeros mensajes
+distintos de los episodios en inglés de S1, la interpretación en cinco
+repeticiones del primer mensaje de N-R02 y en dos repeticiones de cuatro
+reservas de control, y la redacción en tres repeticiones de cuatro episodios.}
+\label{tab:comprobaciones}
+\input{generated/campana-comprobaciones}
+\end{table}
+
+Tres de los fallos estaban en el código y se corrigen cambiando pocas líneas.
+La prueba sin modelos lo confirma para el filtro arrastrado y para la fecha sin
+final, porque con la corrección el paso que falló devuelve las tres citas. El
+caso del idioma es el más claro. Con el código evaluado, S1 respondió en inglés
+en 2 de 12 primeros turnos con Gemini y en ninguno con Groq, igual que en la
+campaña. Con la corrección, que solo cambia el idioma que el código le pasa al
+modelo, respondió en inglés en los 12 con los dos modelos. Es decir, el modelo
+sí entendía el idioma de la persona, pero seguía las instrucciones que
+recibía.
+
+La explicación del orden se resuelve añadiendo una sola frase a las
+instrucciones de la redacción. Con las instrucciones evaluadas, Groq quitó la
+explicación en las doce redacciones repetidas, y con la nueva indicación la
+mantuvo en las doce, sin perder ninguna hora. Añadirla como texto fijo, fuera
+de la redacción, daría el mismo resultado sin depender del modelo.
+
+El caso de \enquote{otra hora} parece fácil de corregir, pero no lo es. Una
+regla en el código basada solo en el servicio preguntaría antes de proponer en
+los nueve fallos, pero también en 48 de las 60 reservas legítimas de la
+campaña, porque la persona ya tiene una cita en casi todos los servicios. Una
+indicación en el agente de contexto resolvió el caso con Gemini en las cinco
+repeticiones, sin convertir en cambios las reservas de control, pero con Groq
+solo en una de cinco. Aquí el problema sí es de comprensión del lenguaje, y la
+solución depende del modelo. Por eso parece mejor combinar la indicación con
+una pregunta de aclaración cuando el mensaje habla de otra hora o de cambiar y
+ya existe una cita del mismo servicio, es decir, preguntar solo cuando hace
+falta \citep{zhang2025clarify}.
+
+La comprobación de anuncios necesita otro enfoque. Buscar expresiones produjo
+27 sustituciones innecesarias de 32, dejó pasar una promesa y, en un caso,
+provocó un falso éxito. Si se comparara lo que dice el texto con las citas y
+la propuesta guardadas en el estado, se podría distinguir la descripción de una
+cita existente del anuncio de una que no existe. Los 32 borradores ya
+clasificados servirían como conjunto de prueba para esa nueva versión. Ninguna
+de estas correcciones cambia la arquitectura. Todas actúan sobre componentes
+que comparten las tres variantes o sobre detalles de implementación de una de
+ellas.
+
+\section{Respuesta a las preguntas de investigación}
+\label{sec:discusion-preguntas}
+
+La Tabla~\ref{tab:respuestas-pi} resume, para cada pregunta, la evidencia
+disponible, la conclusión que permite y la limitación que la condiciona.
+
+\begin{table}[!htbp]
+\centering
+\footnotesize
+\caption[Respuesta a las preguntas de investigación.]{Respuesta a las
+preguntas de investigación: evidencia, conclusión permitida y limitación.}
+\label{tab:respuestas-pi}
+\begin{tabularx}{\textwidth}{L{0.1\textwidth}YYY}
+\toprule
+\textbf{Pregunta} & \textbf{Evidencia} & \textbf{Conclusión permitida} & \textbf{Limitación} \\
+\midrule
+PI1. Agentes especializados & Éxito de 43, 42 y 43 sobre 46 con Groq y de 43, 46 y 43 con Gemini, sin diferencias significativas. Una ventaja de M5 sobre S1 con Groq es un falso positivo del oráculo. M5 con el doble de llamadas y 2,4 veces los tokens de H. H con notas iguales o superiores a M5. & En estas gestiones, M5 no aporta una ventaja sistemática que compense su coste. H es una alternativa más eficiente con resultados iguales o mejores. & Dos modelos, gestiones cortas y una M5 concreta. \\
+PI2. Preferencias & Elección conforme a la franja guardada en 15 de 15 episodios con Gemini y en 8 de 15 con Groq. Explicación del orden omitida en 8 de 10 mensajes de Groq. S1 con Groq consultó el perfil en 3 de 7 casos y respondió en español a mensajes en inglés por un defecto de código. Contrastes de persona resueltos en 36 de 36. & La preferencia se aplica cuando se consulta y se comunica. Importa quién decide consultar el perfil. La renuncia al perfil y la petición expresa se respetaron. & Pocos episodios por configuración. La elección final la hizo un simulador. El nivel de detalle no tiene una medida fiable. \\
+PI3. Controles & Ningún incumplimiento de las comprobaciones de seguridad en 276 episodios, con las 178 escrituras confirmadas con el botón. Ninguna gestión legítima bloqueada. La comprobación de la redacción evitó 3 anuncios o promesas y sustituyó 27 respuestas correctas. Nueve reservas autorizadas que no cumplían la intención. Consejos clínicos en N-B05 que el oráculo no detectó. & Los controles mantuvieron la autorización formal. La veracidad depende de una comprobación léxica con muchas falsas alarmas. Ninguno garantiza el cumplimiento de la intención ni que toda la respuesta respete el alcance administrativo. & Comprobaciones de estado y léxicas, sin prueba de divulgación en la campaña. La confirmación por texto también es léxica. Los resultados dependen de la capa compartida. \\
+PI4. Evaluación conjunta & Agenda, trazas, jurado y revisión humana detectaron problemas distintos. Jurado frente al oráculo con AUC de 0,99 y kappa de 0,51 a 0,80 frente a la revisión humana. & Una evaluación útil combina efectos, trazas y valoración de la conversación, y contrasta los instrumentos entre sí. Las trazas permiten además comprobar correcciones sin repetir la campaña. & Muestra humana pequeña, sin fallos y sin revisores externos. Simulador cooperativo. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\FloatBarrier
+\section{Amenazas a la validez}
+\label{sec:discusion-amenazas}
+
+\paragraph{Validez interna.}
+El corpus final usa conversaciones distintas de las del ajuste, pero mantiene
+las categorías y los requisitos del diseño, lo que puede favorecer en parte los
+resultados. El usuario simulado es el mismo en todas las configuraciones, pero
+reacciona a lo que dice el asistente. Elige según cómo se presentan las
+opciones, porque no conoce su preferencia, y aceptó operaciones que no
+correspondían a su objetivo. Como M5 y H comparten el agente de contexto, sus
+diferencias no se pueden atribuir solo al número de agentes.
+
+\paragraph{Validez de constructo.}
+El éxito depende de las reglas del oráculo, cuyas comprobaciones de respuesta y
+de fidelidad son léxicas. La adherencia a preferencias mezcla la decisión del
+asistente con la del simulador. Las notas de calidad dependen de una rúbrica
+con criterios generales, en la que un rechazo legítimo o una mezcla de
+tratamientos se pueden valorar de más de una forma, y de jueces cuya validez
+depende del modelo y de la tarea \citep{bavaresco2025judgebench,gu2024judgesurvey}.
+Los jueces pueden preferir las respuestas largas o las de su propio proveedor
+\citep{zheng2023llmjudge,panickssery2024selfpreference}. La diferencia agregada
+observada entre ellos es pequeña, pero no permite descartar una preferencia por
+el propio proveedor. Las diferencias entre condiciones podrían compensarse y
+la comparación no aísla ese posible sesgo de las demás diferencias entre los
+jueces.
+
+\paragraph{Validez de conclusión.}
+Hay pocas familias y los casos comparten agendas y formas de interacción, lo que
+reduce el número real de observaciones independientes. Con 46 unidades por
+contraste y tasas de éxito superiores al 90\,\%, solo las diferencias grandes
+podrían ser significativas, y además la prueba exacta de McNemar es
+conservadora. Las diferencias de calidad son de décimas de punto. Las pruebas
+de las correcciones repiten un solo paso pocas veces, así que indican si la
+corrección actúa donde falló el sistema, pero no cuánto mejoraría el éxito
+integral. La kappa tampoco sirve en las dimensiones del simulador, donde casi
+todas las notas son 3 \citep{feinstein1990kappa}.
+
+\paragraph{Validez externa.}
+El entorno usa datos sintéticos, agendas pequeñas y solo citas presenciales. No
+se observa la conducta de pacientes reales, que probablemente serán menos
+cooperativos que el simulador \citep{zhou2026sim2real}, ni el funcionamiento de
+un HIS en producción. Los resultados se limitan a los dos modelos, los
+servicios y las gestiones estudiados. La revisión humana no ha contado con
+revisores externos y se ha hecho conociendo el diseño de las arquitecturas y la
+hipótesis sobre M5. La revisión ciega y la comparación con el jurado y el
+oráculo reducen ese riesgo, pero no sustituyen a revisores independientes. La
+segunda pasada muestra que las notas son estables, con un 90\,\% de acuerdo
+exacto, pero esa estabilidad no dice cuánto coincidirían con las de otras
+personas.

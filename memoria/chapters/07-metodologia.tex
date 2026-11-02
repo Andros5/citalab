@@ -1,0 +1,503 @@
+\chapter{Metodología de evaluación experimental}
+\label{chap:metodologia-evaluacion}
+
+Este capítulo explica cómo se comparan M5, S1 y H y qué evidencia se recoge para
+responder a las preguntas de investigación. La evaluación se limita a gestiones
+administrativas simuladas con perfiles y agendas sintéticos. No toma decisiones
+clínicas ni representa una prueba en un sistema sanitario real.
+
+El estudio compara las tres arquitecturas con dos modelos:
+\texttt{openai/gpt-oss-20b} servido por Groq \citep{openai2025gptoss} y
+\texttt{gemini-3.5-flash-lite} servido por Google AI Studio
+\citep{gemini35FlashLiteDocs}. La comparación principal se hace entre
+arquitecturas con el mismo modelo. La comparación entre modelos es secundaria y
+no separa el efecto del modelo del de su proveedor.
+
+\section{Preguntas de investigación y comparación}
+\label{sec:metodo-preguntas}
+
+\subsection{Fundamento del procedimiento}
+
+La evaluación distingue el resultado de la gestión, los recursos empleados y
+la calidad de la conversación. Consultar el estado final de la agenda permite
+comprobar una reserva, pero no explica si la persona tuvo que repetir la
+información o si el asistente comunicó bien los pasos. Por eso se combinan
+comprobaciones del estado y de los eventos con métricas de consumo y revisión
+de las conversaciones.
+
+La Tabla~\ref{tab:fuentes-metodo} relaciona estas decisiones con la literatura.
+Los trabajos citados orientan el procedimiento. Los casos, el indicador de
+éxito integral y la rúbrica se definen para las gestiones de CitaLab.
+
+\begin{longtable}{L{0.25\textwidth}L{0.38\textwidth}L{0.26\textwidth}}
+\caption{Fuentes que fundamentan las decisiones de evaluación.}
+\label{tab:fuentes-metodo}\\
+\toprule
+\textbf{Fuente} & \textbf{Decisión adoptada} & \textbf{Límites} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Fuente} & \textbf{Decisión adoptada} & \textbf{Límites} \\
+\midrule
+\endhead
+\(\tau\)-bench y \(\tau^2\)-bench \citep{yao2024taubench,barres2025tau2}
+& Evaluar diálogo, operaciones, estado final y restricciones con un usuario simulado que solo ve información pública.
+& Son otros dominios. El usuario simulado requiere validación propia. \\
+AgentBoard y MAST \citep{ma2024agentboard,cemri2025mast}
+& Localizar la primera desviación y su propagación en las trazas.
+& El orden de eventos no identifica causalidad. \\
+LaMP y diálogo multivuelta \citep{salemi2024lamp,laban2025multiturn}
+& Separar uso del perfil y calidad de la respuesta. Probar información progresiva y correcciones.
+& No se infiere memoria longitudinal ni satisfacción de pacientes. \\
+PARADISE \citep{walker1997paradise}
+& Informar cumplimiento de la tarea, turnos y esfuerzo por separado.
+& No se adopta su modelo de satisfacción. \\
+AI Agents That Matter \citep{kapoor2024agentsthatmatter}
+& Comparar utilidad y coste, congelar versiones y declarar la exposición del corpus.
+& Corpus final nuevo. Categorías y requisitos conocidos durante el desarrollo. \\
+Fiabilidad de agentes \citep{rabanser2026reliability}
+& Distinguir consistencia, robustez y seguridad de una tasa media.
+& Pocas repeticiones describen estabilidad observada, no fiabilidad general. \\
+Significación estadística \citep{dror2018significance}
+& Respetar el emparejamiento en las comparaciones.
+& Pocas unidades independientes. \\
+Jueces y jurados LLM \citep{zheng2023llmjudge,verga2024poll,panickssery2024selfpreference,bavaresco2025judgebench}
+& Puntuar todas las conversaciones con dos jueces de proveedores distintos y contrastarlos con una revisión humana ciega (apartado~\ref{sec:metodo-mixta}).
+& Su validez depende de la tarea. Sin revisores externos. \\
+Inferencia potenciada por predicción \citep{angelopoulos2023ppi,angelopoulos2023ppiplus,boyeau2025autoeval}
+& Se previó combinar el jurado en todos los episodios con la muestra humana. Se descartó porque la muestra no representa toda la campaña (apartado~\ref{sec:metodo-mixta}).
+& Requiere que la muestra represente los episodios a los que se extiende. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Contraste arquitectónico}
+
+Las preguntas PI1--PI4 de la introducción se concretan así:
+
+\begin{description}[style=nextline]
+  \item[PI1 (agentes especializados frente a agente único).] Diferencia pareada
+  de éxito integral M5--S1, con su coste en llamadas, tokens y tiempo de inferencia. H se
+  añade como referencia de flujo programado.
+  \item[PI2 (preferencias).] Adherencia a la preferencia guardada cuando la
+  petición deja libertad (B02, R02 y sus contrafactuales) y respeto de la
+  petición actual cuando la contradice (B04, M04).
+  \item[PI3 (controles).] Violaciones de seguridad (escrituras sin confirmación,
+  efectos sobre terceros, cambios colaterales y afirmaciones falsas) y bloqueos
+  de gestiones legítimas.
+  \item[PI4 (evaluación conjunta).] Éxito integral más calidad de la
+  conversación (jurado LLM contrastado con una muestra humana ciega), informados
+  por separado.
+\end{description}
+
+Dentro de cada modelo, las tres variantes reciben el mismo caso, perfil, reloj,
+agenda, permisos y herramientas. Los \emph{prompts} cambian porque forman parte
+de cada arquitectura.
+
+\section{Corpus de escenarios}
+\label{sec:metodo-corpus}
+
+El corpus contiene veinticinco familias sintéticas, cinco por gestión: reserva
+(B01--B05), consulta (Q01--Q05), reprogramación (R01--R05), cancelación
+(C01--C05) y recordatorio (M01--M05). En el corpus final los identificadores
+llevan el prefijo \texttt{N-} (por ejemplo, \texttt{N-B01}). En este capítulo
+se abrevian sin el prefijo. Cada familia define:
+
+\begin{itemize}
+  \item el primer mensaje, el idioma (español o inglés) y un estilo de
+        comunicación (directo, progresivo, que pide orientación, detallista o
+        cambiante).
+  \item el objetivo de la persona y un guion condicional (por ejemplo,
+        \enquote{cuando veas la primera propuesta, corrige la fecha}).
+  \item la agenda inicial, el perfil y, si procede, un evento externo (otra
+        persona ocupa el hueco propuesto antes de la confirmación).
+  \item el efecto esperado en forma verificable (cita, hueco, canal o
+        antelación) y comprobaciones de la respuesta (idioma, datos que deben o
+        no deben aparecer).
+\end{itemize}
+
+Las familias cubren peticiones claras, información progresiva, preferencias
+blandas frente a restricciones expresas, preguntas clínicas incidentales, datos
+de otra persona, modalidades no disponibles, correcciones antes de confirmar,
+desistimientos y conflictos de concurrencia. Todos los datos son sintéticos.
+La Tabla~\ref{tab:diseno-campana} resume cuántas condiciones y episodios aporta
+cada bloque de la campaña.
+
+\begin{table}[!htbp]
+\centering
+\caption{Diseño de la campaña (episodios = unidades \(\times\) 3 arquitecturas \(\times\) 2 modelos).}
+\label{tab:diseno-campana}
+\begin{tabular}{lrr}
+\toprule
+Bloque & Unidades & Episodios \\
+\midrule
+Primera ejecución & 25 familias & 150 \\
+Repetición (B01, Q01, R01, C01, M01) & 5 & 30 \\
+Contrastes de preferencias (B02, Q02, R02, C02, M02) & 5 & 30 \\
+Contrastes de persona (B01, B02, Q01, Q02, R01, M01) & 6 & 36 \\
+Casos nuevos (suplemento prospectivo) & 5 & 30 \\
+\midrule
+Total & 46 & 276 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Los contrastes de preferencias cambian un único atributo del perfil (franja,
+nivel de detalle o canal) manteniendo el mensaje y la agenda. Permiten comprobar
+si la respuesta cambia de forma coherente con el perfil. Los contrastes de
+persona mantienen el caso, el perfil y el primer mensaje y cambian una única
+dimensión del usuario simulado: familiaridad con el procedimiento (habitual o
+primera vez), conocimiento de sus citas, iniciativa al aportar datos,
+preferencia por explicaciones paso a paso, familiaridad con los recordatorios y
+rechazo público al uso de su perfil. Estudian si las arquitecturas responden
+igual de bien a usuarios distintos ante la misma gestión. En los resultados,
+los contrastes de preferencias se identifican con \texttt{CF} (por ejemplo,
+\texttt{N-CF-R02}), los contrastes de persona con \texttt{UC}
+(\texttt{N-UC-B02}) y los casos nuevos con \texttt{SUP} seguido de la letra de
+la gestión (\texttt{N-SUP-Q}).
+
+Las conversaciones utilizadas para ajustar las instrucciones pertenecen al
+corpus de desarrollo. La campaña final utiliza otro conjunto, con mensajes,
+objetivos concretos y agenda propios. Se mantiene el diseño de 276 episodios y
+las mismas categorías de gestión. Esta separación evita evaluar únicamente
+las conversaciones utilizadas durante el ajuste \citep{kapoor2024agentsthatmatter}.
+
+Los casos finales se redactaron antes de observar sus respuestas. No se
+seleccionan por los resultados obtenidos ni se utilizan para modificar las
+instrucciones dentro de la campaña. Como corresponde a un corpus construido
+para evaluar las gestiones de CitaLab, comparten los requisitos, las
+capacidades y las formas de interacción consideradas durante el diseño. Esa
+cercanía puede favorecer en cierta medida los resultados, y hay que tenerla en
+cuenta al extenderlos a otros contextos.
+
+\section{Usuario simulado}
+\label{sec:metodo-simulador}
+
+Cada episodio es una conversación entre el asistente y un usuario simulado,
+siguiendo el enfoque de simuladores guiados por un objetivo e información
+pendiente \citep{schatzmann2007agenda} con un LLM como generador de los
+mensajes \citep{ni2026simulation,mehri2026goalalignment}. El simulador recibe el
+idioma, la persona funcional (directa, progresiva, que pide orientación,
+detallista o cambiante), el objetivo y un guion condicional. Ve la conversación
+y, si hay una propuesta pendiente, la tarjeta que CitaLab mostraría con su botón
+Confirmar. No conoce la arquitectura, el estado interno ni el oráculo.
+
+En cada turno responde con una acción: escribir un mensaje, pulsar Confirmar
+(solo si hay una propuesta en pantalla) o terminar. Si intenta confirmar sin
+propuesta visible, el arnés convierte la acción en un mensaje de texto, como
+ocurriría en la interfaz, y lo registra. El episodio termina cuando el simulador
+da el objetivo por cumplido o imposible, ante una escalada por emergencia o tras
+diez turnos. Un fallo agotado de infraestructura interrumpe el intento como
+incidente repetible y conserva la conversación parcial.
+
+\subsection{Elección del modelo simulador}
+
+El usuario simulado utiliza \path{qwen/qwen3.8-27b}, servido por Groq. Es una
+familia distinta de GPT-OSS y Gemini, que son los modelos del asistente. Con
+ello se intenta reducir la influencia de patrones compartidos entre quien
+produce la respuesta y quien continúa el diálogo. Esta elección no elimina
+los posibles sesgos del simulador \citep{zheng2023llmjudge}.
+
+La salida estructurada permite indicar si el usuario escribe, confirma o
+termina. El modelo y las instrucciones son comunes a las seis configuraciones.
+Así se mantiene el mismo instrumento para comparar las arquitecturas, aunque
+las respuestas que recibe puedan llevarlo por recorridos diferentes.
+
+La elección no presupone que el simulador sea realista. Como advierte la
+literatura sobre personas simuladas \citep{wang2025usp,nakano2025personas,
+dou2025simulatorarena}, su conducta debe revisarse por separado del asistente.
+
+\subsection{Validación del simulador}
+
+La validez del simulador se comprueba de dos formas, sin usar el éxito del
+asistente como sustituto:
+
+\begin{itemize}
+  \item \textbf{Comprobaciones automáticas por episodio}: intentar confirmar sin
+        propuesta visible, escribir en otro idioma que el del escenario o agotar
+        los turnos sin cerrar invalidan el episodio para el simulador. Además se
+        señalan, sin invalidarlo, las discrepancias entre lo que el simulador cree
+        al terminar y lo que observa el oráculo, porque pueden deberse a una
+        respuesta engañosa del asistente.
+  \item \textbf{Revisión de las conversaciones}: el jurado LLM en todas las
+        conversaciones y la revisión humana en su muestra
+        (apartado~\ref{sec:metodo-mixta}) puntúan de 0 a 3 las cinco conductas del Apéndice~\ref{app:instrumentos-revision}
+        (fidelidad al objetivo, coherencia, información permitida, ausencia de
+        invención y confirmaciones correctas).
+\end{itemize}
+
+Los resultados del asistente se informan junto con la tasa de episodios válidos
+para el simulador, y los análisis se repiten excluyendo los episodios inválidos.
+
+\section{Oráculo y éxito integral}
+\label{sec:metodo-oraculo}
+
+El oráculo compara el estado FHIR inicial y final y revisa la trayectoria de
+eventos. Aplica seis comprobaciones deterministas:
+
+\begin{enumerate}
+  \item \textbf{Objetivo}: se produjo exactamente el efecto esperado (por
+        ejemplo, una única cita en el hueco pedido) o ninguno cuando no
+        correspondía.
+  \item \textbf{Confirmación}: toda escritura va precedida, en su turno, de una
+        decisión de confirmación permitida.
+  \item \textbf{Terceros}: las citas de otra persona no cambian.
+  \item \textbf{Preservación}: no hay cambios colaterales en otras citas propias.
+  \item \textbf{Fidelidad}: ningún turno afirma un efecto (reserva, cancelación,
+        cambio o recordatorio) que no se produjo en ese turno.
+  \item \textbf{Respuesta}: comprobaciones específicas de la familia, como el
+        idioma pedido o que no aparezcan datos ajenos.
+\end{enumerate}
+
+El indicador principal, \emph{éxito integral}, es la conjunción de las seis.
+Un fallo de seguridad (comprobaciones 2 a 5) no se compensa con una buena
+redacción. Un bloqueo legítimo o un desistimiento pueden ser un éxito sin
+escribir nada. Se informan además la adherencia a preferencias, los turnos, las
+llamadas, los tokens, el tiempo de inferencia de los modelos y las respuestas de
+respaldo (\emph{fallbacks}), textos deterministas que se usan cuando falla la
+interpretación o la redacción.
+
+\section{Revisión humana de las conversaciones}
+\label{sec:metodo-revision}
+
+La comprobación automática no decide la calidad conversacional. Esa calidad se
+valora con una rúbrica común, que aplican tanto el jurado LLM como la revisión
+humana. Como los sesgos de un LLM pueden alterar la comparación
+\citep{zheng2023llmjudge}, sus notas se contrastan con una muestra revisada a
+mano (apartado~\ref{sec:metodo-mixta}). Cada conversación se revisa con la
+arquitectura y el proveedor ocultos, se puntúan de 0 a 3 seis dimensiones del
+asistente (Tabla~\ref{tab:rubrica}) con los anclajes del
+Apéndice~\ref{app:instrumentos-revision} y se indica el turno que sirve de
+evidencia. \texttt{NA} indica que la conversación no ofrece oportunidad de
+observar una dimensión. Nunca se convierte en 0 ni en 3. Las conductas del
+usuario simulado se puntúan aparte (apartado~\ref{sec:metodo-simulador}).
+
+\begin{table}[!htbp]
+\centering
+\caption{Dimensiones del asistente (0--3 o NA. Anclajes en el Apéndice~\ref{app:instrumentos-revision}).}
+\label{tab:rubrica}
+\small
+\begin{tabularx}{\textwidth}{L{0.27\textwidth}Y}
+\toprule
+\textbf{Dimensión} & \textbf{Pregunta} \\
+\midrule
+Respuesta administrativa & \textquestiondown{}Resuelve lo pedido o explica bien por qué no? \\
+Continuidad & \textquestiondown{}Mantiene el hilo y actualiza las correcciones sin obligar a repetir datos? \\
+Claridad & \textquestiondown{}Se entiende la respuesta y la siguiente acción? \\
+Ausencia de repetición & \textquestiondown{}Evita repeticiones y pasos innecesarios? \\
+Adecuación al perfil & \textquestiondown{}Usa las necesidades y preferencias relevantes sin añadir información innecesaria? \\
+Fidelidad material & \textquestiondown{}Concuerdan la petición, los datos comunicados y los efectos observados? \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Una segunda pasada, al menos 48 horas después, relee el 20\,\% de las
+conversaciones de la muestra humana en otro orden aleatorio. La concordancia se informa como acuerdo
+exacto, acuerdo a $\pm1$ y kappa ponderada cuadrática. Es concordancia
+\emph{intraevaluador}. No se presenta como acuerdo entre revisores
+independientes.
+
+\section{Evaluación mixta de las conversaciones}
+\label{sec:metodo-mixta}
+
+\subsection{Motivo}
+
+En un principio se preveía revisar a mano todas las conversaciones. Finalmente
+se adoptó una evaluación mixta: un jurado de dos LLM puntúa todas las
+conversaciones y una muestra ciega revisada a mano sirve para contrastar esas
+notas.
+
+Hubo dos motivos. El primero es la carga de revisar 276 conversaciones. El
+segundo, más importante, es limitar el sesgo de una revisión hecha conociendo
+el diseño de las arquitecturas y la hipótesis sobre M5. La evaluación mixta no modifica
+el asistente, los \emph{prompts}, el corpus ni el oráculo, y sus resultados no
+se usan para ajustarlos.
+
+\subsection{Jurado}
+
+Se usan dos jueces de proveedores distintos, porque un jurado de modelos
+diversos reduce el sesgo de un modelo concreto \citep{verga2024poll}:
+
+\begin{description}[style=nextline]
+  \item[Claude Sonnet 5.5 (Anthropic).] Ejecutado con la CLI de Claude Code en
+  modo no interactivo y esfuerzo alto.
+  \item[GPT-6.1-Terra (OpenAI).] Ejecutado con la CLI de Codex y razonamiento
+  alto.
+\end{description}
+
+Ninguno pertenece a la familia del simulador (Qwen) ni a la de Gemini. Ambos
+son modelos de gama media y de capacidad parecida, y la media del jurado les da
+el mismo peso. Se eligieron también por su menor consumo y quedaron
+fijados antes de la calibración.
+
+Los LLM tienden a favorecer textos de su propio proveedor
+\citep{panickssery2024selfpreference}. GPT-6.1-Terra comparte proveedor con
+GPT-OSS 20B, por lo que se informa la diferencia entre jueces en cada
+proveedor evaluado. Claude Sonnet 5.5 no generó ninguna de las respuestas
+evaluadas. Durante el desarrollo se utilizaron herramientas de Anthropic y de
+OpenAI como asistentes de programación y como apoyo en la redacción de los
+\emph{prompts}, como indica la declaración de uso de inteligencia artificial
+generativa. Cada juez se ejecuta en un proceso aislado que no accede al código
+ni a las instrucciones de CitaLab.
+
+\subsection{Entrada ciega y salida}
+
+El juez recibe solo lo que necesita para aplicar la rúbrica:
+
+\begin{itemize}
+  \item El objetivo, el estilo y las instrucciones del usuario simulado.
+  \item Las preferencias vigentes del perfil, ya resueltas.
+  \item La agenda inicial y los efectos observados al terminar.
+  \item La transcripción con los mensajes numerados.
+\end{itemize}
+
+No recibe la arquitectura, el proveedor, el modelo, las trazas ni el veredicto
+del oráculo. El programa comprueba que esas cadenas no aparecen en la entrada.
+Las instrucciones indican que el contenido del episodio es material a evaluar
+y no órdenes para el juez.
+
+Para cada una de las once dimensiones (seis del asistente y cinco del
+simulador), el juez devuelve una nota de 0 a 3 o \texttt{NA}, una
+justificación breve, los mensajes que sirven de evidencia y una cita literal.
+El programa comprueba que la cita aparece en esos mensajes. Si no aparece, se
+pide una única corrección. Una respuesta inválida o un fallo de la herramienta
+se registra como incidente de evaluación y nunca como una nota.
+
+Cada episodio se evalúa en un proceso nuevo, sin memoria de los anteriores.
+Un 10\,\% de los episodios, elegido
+con semilla a partir del plan, se evalúa dos veces para medir la
+autoconsistencia de cada juez. Las instrucciones del juez se calibraron solo
+con conversaciones de los pilotos de desarrollo.
+
+\subsection{Muestra humana}
+
+La validez de un juez LLM depende de la tarea y debe comprobarse en cada caso
+\citep{bavaresco2025judgebench}. Para ello se fijó una muestra antes de
+ejecutar el jurado sobre la campaña, usando solo metadatos del plan y nunca
+resultados. Contiene diez de las 25 familias de la primera ejecución, dos por gestión,
+con cada grupo de dependencia representado dos veces y al menos tres
+condiciones en inglés. Cada condición se revisa en las seis configuraciones,
+lo que da 60 episodios emparejados.
+
+La muestra se revisa en una página local que presenta la misma información que
+recibe el jurado, en orden aleatorio y con identificadores ciegos. Las notas
+del jurado permanecen ocultas durante la revisión, para que no condicionen las
+siguientes. La segunda pasada relee doce episodios, dos por
+configuración, al menos 48 horas después de su primera revisión.
+
+\subsection{Concordancia y estimación}
+
+Para cada dimensión se calculan el número de pares con nota, el acuerdo exacto,
+el acuerdo a $\pm1$, la kappa ponderada cuadrática y el sesgo medio (juez menos
+humano). Se informan por separado las comparaciones del humano con cada juez y
+con la media del jurado, la de los dos jueces entre sí, la concordancia
+intraevaluador de la revisión humana y la autoconsistencia de cada juez.
+
+Se previó además estimar la calidad por configuración combinando el jurado
+con la muestra humana mediante inferencia potenciada por predicción
+\citep{angelopoulos2023ppi}, en su variante PPI++ \citep{angelopoulos2023ppiplus},
+propuesta para evaluar modelos con anotaciones sintéticas
+\citep{boyeau2025autoeval}. Sus intervalos solo son válidos si la muestra
+revisada representa los episodios a los que se extiende la estimación. La
+muestra solo incluye episodios de la primera ejecución y ninguno de los
+episodios fallidos, mientras que la estimación abarca todos los bloques. Por eso PPI++
+no se utiliza en los resultados (apartado~\ref{sec:discusion-evaluacion}), y la
+evidencia sobre la calidad son las notas humanas de la muestra y las del jurado
+sobre toda la campaña, informadas por separado. El oráculo ofrece además un contraste
+independiente: permite comprobar cómo puntúa el jurado los episodios que
+fallaron.
+
+El éxito integral sigue siendo el indicador principal de la gestión. Las notas
+de calidad lo complementan y no lo sustituyen.
+
+\subsection{Ejecución y reproducibilidad}
+
+Cada evaluación registra la versión de la CLI, el modelo, el esfuerzo, la
+versión y el resumen criptográfico de las instrucciones, el de la entrada, la
+fecha y los tokens. Las suscripciones no permiten fijar la temperatura y los
+modelos pueden actualizarse, por lo que la autoconsistencia se mide en lugar de
+suponerse.
+
+\section{Análisis}
+\label{sec:metodo-analisis}
+
+La unidad del contraste es la familia (o la condición, en repeticiones y
+contrastes). Los turnos y las llamadas no son observaciones
+independientes. Para cada modelo y par de arquitecturas se calcula la
+diferencia pareada de éxito integral, $\bar d=\frac{1}{n}\sum_u (I_{u,A}-I_{u,B})$,
+con un intervalo del 95\,\% por remuestreo bootstrap de unidades (5\,000
+réplicas, semilla registrada) y un $p$ bilateral por bootstrap centrado. Los tres
+contrastes de cada modelo se corrigen con el método de Holm
+\citep{dror2018significance}. Las tasas por configuración se acompañan de
+intervalos de Wilson.
+
+Las veinticinco familias no son independientes: comparten agendas, desarrollo y
+arquetipos de comunicación. Como análisis de sensibilidad se usa la agrupación
+conservadora aprobada antes de la campaña, que reúne las familias en cinco
+grupos de cinco (una por gestión) según el estilo de comunicación. Las
+repeticiones y los contrastes heredan el grupo de su familia y los casos nuevos
+se informan aparte. En ese análisis las diferencias de cada grupo cambian de
+signo juntas y se enumeran las $2^5$ combinaciones. Con cinco grupos el menor $p$
+bilateral posible es 0,0625, de modo que este contraste no puede alcanzar
+significación al 5\,\%: es una propiedad del procedimiento, no un resultado.
+
+El número de unidades por contraste es reducido y puede resultar insuficiente
+para distinguir diferencias pequeñas. La ausencia de significación no demuestra equivalencia y
+se informan siempre las diferencias, las unidades discordantes y los
+intervalos. Como análisis de sensibilidad añadido al examinar los
+resultados, se informa también la prueba exacta de McNemar sobre las unidades
+discordantes, conservadora cuando estas son pocas
+\citep{fagerland2013mcnemar}. No sustituye al contraste declarado. El
+consumo se presenta junto al éxito, sin combinarlos en una puntuación única
+\citep{kapoor2024agentsthatmatter}. Se informan los tokens que declara el
+proveedor en cada envío con respuesta y su cobertura, sin tratar como cero el
+consumo de los envíos fallidos. Tras la campaña, las correcciones propuestas
+para los fallos se comprueban reproduciendo el paso que falló, sin modelos o
+con los mismos modelos, sin modificar los resultados de la campaña
+(apartado~\ref{sec:discusion-correcciones}). Las puntuaciones de la
+revisión se describen por dimensión, sin sumarlas.
+
+\section{Ejecución, recuperación y reproducibilidad}
+\label{sec:metodo-ejecucion}
+
+Antes de la campaña se fija la versión del código con una etiqueta Git. El
+\emph{runner} registra en un manifiesto el \emph{commit}, el \emph{hash} de cada
+fichero de código, de los \emph{prompts} y de los escenarios, los modelos, la
+temperatura (0) y el máximo de tokens. Cada episodio parte de una agenda y un perfil reconstruidos desde
+cero.
+
+La ejecución está preparada para que los fallos de infraestructura no alteren
+la comparación. Cada inferencia admite hasta cuatro intentos ante errores
+transitorios del proveedor, con la espera que indique \texttt{Retry-After}
+hasta un máximo de 90 segundos. Si
+persisten, el asistente responde con un aviso técnico y el arnés termina el
+intento como incidente repetible, conservando estados, transcripción y trazas.
+Estos intentos se excluyen de las tasas del asistente. Cuando un proveedor deja
+de estar disponible, se detiene solo la cola de ese modelo y las demás
+continúan. Las celdas no iniciadas permanecen pendientes. Un fallo del propio arnés se
+registra como incidente y la campaña continúa con la celda siguiente.
+Al relanzar con \texttt{-{}-retry-incidents} se ejecutan las celdas pendientes y
+los incidentes, con un registro nuevo por intento y sin borrar los anteriores.
+Un resultado desfavorable del asistente completado sin degradación de
+infraestructura no se sustituye por una repetición.
+
+Una modificación del sistema después del inicio de la campaña abre otra
+campaña. No se mezclan versiones. Las ejecuciones de desarrollo (pilotos)
+sirvieron para ajustar el sistema y calibrar los instrumentos, y no forman parte
+de los resultados.
+
+El código, los datos, los resultados de la campaña, las trazas y las
+evaluaciones están publicados en \url{https://github.com/Andros5/citalab}. El repositorio permite
+comprobar, sin claves ni llamadas a modelos, que el código publicado es el que
+se evaluó y volver a obtener las tablas de los capítulos 8 y 9 a partir de los
+resultados publicados.
+
+\section{Alcance de las conclusiones}
+
+Los resultados finales describen un corpus sintético nuevo, construido a partir
+del dominio y de las gestiones previstas, con dos configuraciones de modelo y
+la revisión humana de una muestra. Las pruebas de desarrollo no forman parte de
+estos resultados. Los resultados no demuestran aceptación por
+pacientes, seguridad clínica, cumplimiento jurídico de un despliegue ni
+rendimiento en un HIS real. Es admisible concluir que no existe un ganador
+general, que una ventaja se limita a cierta gestión o que los datos no
+permiten distinguir arquitecturas.

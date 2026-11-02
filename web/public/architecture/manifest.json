@@ -1,0 +1,50 @@
+{
+  "archify_revision": "10722002bb8777ecb639d93c49586fae4adf3ae4",
+  "diagrams": {
+    "sistema": {
+      "title": "CitaLab · mapa del sistema",
+      "type": "architecture",
+      "specification_sha256": "e4f9f00bab583aa4ca127aa0e8b47856e44c3a124c88fc30dfc12e610f4bf911",
+      "artifact_sha256": "2720b8c8867f6af0a53bb867658aa20df6613deaa892493dc749cabc88455e3f",
+      "bytes": 803485,
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    "agentes": {
+      "title": "M5 · cinco roles LLM, ejecución controlada",
+      "type": "architecture",
+      "specification_sha256": "35324525a11aa8c7491544897aecd31fccd080bd9a0377a81d6a0e27525ab529",
+      "artifact_sha256": "e2f061c78f8e97519ab0cb92fea98518ed4d58769964548cbb7dff12bbaf62dd",
+      "bytes": 803679,
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    "reserva": {
+      "title": "Reservar · propuesta no equivale a cita",
+      "type": "sequence",
+      "specification_sha256": "ffe46163d14a0bfa8b98c9b3548c0448a532ddabdc1ddf47e2d12d283e70e50b",
+      "artifact_sha256": "c674e1e417aed17becd234a76b7b7d366a98f76092db96e39358cef7c057ac8e",
+      "bytes": 805159,
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      }
+    }
+  }
+}

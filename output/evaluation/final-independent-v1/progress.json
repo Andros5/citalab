@@ -1,0 +1,23 @@
+{
+  "campaign": "final-independent-v1",
+  "state": "finished",
+  "pid": 11860,
+  "planned": 276,
+  "completed": 276,
+  "incidents": 0,
+  "not_started": 0,
+  "by_provider": {
+    "groq": {
+      "planned": 138,
+      "completed": 138,
+      "incidents": 0
+    },
+    "google": {
+      "planned": 138,
+      "completed": 138,
+      "incidents": 0
+    }
+  },
+  "paused_providers": {},
+  "updated_at": "2026-10-31T12:20:03.622514+00:00"
+}

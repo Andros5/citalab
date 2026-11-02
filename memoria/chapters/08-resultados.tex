@@ -1,0 +1,1011 @@
+\chapter{Resultados y análisis de errores}
+\label{chap:resultados}
+
+Este capítulo presenta los resultados de la campaña final sin interpretarlos.
+Primero se describe qué parte de la evaluación se completó. Después se comparan
+las seis configuraciones (tres arquitecturas con dos modelos) en éxito,
+seguridad, consumo, uso de preferencias y calidad de la conversación. Por
+último, se analizan los 16 episodios que fallaron y se estudian ocho casos
+concretos, con su conversación y su traza, para entender por qué se produjeron
+los fallos y los aciertos. Para abreviar, se llama Groq al modelo
+\texttt{openai/gpt-oss-20b} servido por Groq, y Gemini a
+\texttt{gemini-3.5-flash-lite}. La interpretación de los resultados se hace en
+el capítulo~\ref{chap:discusion}.
+
+\section{Cobertura de la evaluación}
+\label{sec:resultados-cobertura}
+
+La evaluación se observa en tres niveles: los intentos
+de episodio, los envíos a los modelos y las evaluaciones de la calidad. La
+Tabla~\ref{tab:niveles} resume cada uno.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Niveles de la evaluación.]{Niveles de la evaluación. Un envío es una
+petición a la API de un proveedor. Una evaluación es la nota de un juez o de
+la revisión humana para un episodio.}
+\label{tab:niveles}
+\begin{tabularx}{\textwidth}{L{0.25\textwidth}rY}
+\toprule
+\textbf{Nivel} & \textbf{Total} & \textbf{Incidencias} \\
+\midrule
+Intentos de episodio & 278 & Dos intentos interrumpidos por la cuota diaria de Gemini, repetidos al relanzar la campaña. Los 276 episodios tienen un intento terminado. \\
+Envíos a los modelos & 2369 & 258 envíos fallidos: 251 del simulador por una salida que no se ajustaba al esquema JSON y siete del asistente. Ninguno, salvo los dos de cuota, interrumpió un episodio. \\
+Evaluaciones de calidad & 680 & 608 del jurado (304 por juez) sin incidentes, 60 de la primera pasada humana y 12 de la segunda. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Los 276 episodios previstos se completaron, 138 con Groq y 138 con Gemini.
+Gemini agotó su cuota diaria durante dos episodios de M5, una consulta de la
+primera ejecución y una reserva de los casos nuevos. Esos dos intentos se
+guardan como incidentes de infraestructura y no cuentan en las tasas. Se
+repitieron al relanzar la campaña, con un registro nuevo y sin borrar el
+anterior (apartado~\ref{sec:metodo-ejecucion}), y las dos repeticiones
+terminaron sin problemas. Ningún episodio completado se ha sustituido por otro.
+
+Salvo los dos de cuota, los envíos fallidos no interrumpieron ninguna
+conversación. Los 251 del simulador fallaron porque Groq rechazó una respuesta
+del modelo que no se ajustaba al esquema JSON estricto. En esos casos, el
+cliente volvió a pedir la respuesta en modo JSON, con una guía de los campos, y
+la validó en local (capítulo~\ref{chap:implementacion}). Del asistente fallaron
+siete envíos: los dos de cuota, tres respuestas rechazadas por el mismo motivo,
+que se volvieron a pedir de la misma forma, un tiempo de espera agotado y una
+sobrecarga de Gemini. Estos dos últimos se resolvieron al reintentar.
+
+La evaluación de la calidad cubre toda la campaña. Cada juez hizo 304
+evaluaciones válidas, una por cada uno de los 276 episodios y 28 repeticiones
+para medir su autoconsistencia. En cada nota, el juez debe indicar los mensajes
+en los que se basa y copiar de ellos una cita literal, y el programa comprueba
+que la cita aparece en esos mensajes. Si la respuesta no es válida, por ejemplo
+porque la cita no está en los mensajes indicados, se pide al juez que la
+corrija una sola vez. Claude Sonnet 5.5 necesitó esa corrección en 11
+evaluaciones y GPT-6.1-Terra en 2, y todas fueron válidas en el segundo
+intento. Los dos jueces mantuvieron el mismo modelo, esfuerzo, versión de la
+CLI e instrucciones durante toda la ejecución. La revisión humana cubre en su
+primera pasada los 60 episodios de la muestra. La segunda pasada, sobre doce de
+esos episodios, solo se usa para medir la concordancia intraevaluador.
+
+\section{Resultados por configuración}
+\label{sec:resultados-config}
+
+\subsection{Éxito integral}
+
+La Tabla~\ref{tab:resultados-config} recoge el éxito integral de cada
+configuración. Un episodio cuenta como éxito integral solo si supera a la vez
+las seis comprobaciones del oráculo (apartado~\ref{sec:metodo-oraculo}): la
+agenda termina exactamente con el efecto esperado, toda escritura se confirmó
+antes, las citas de otras personas no cambian, no hay cambios en otras citas
+propias, ningún mensaje anuncia un efecto que no se produjo y, en las familias
+que lo exigen, la respuesta incluye los datos pedidos, en el idioma pedido y
+sin datos de otra persona. La columna de objetivo solo tiene en cuenta el
+efecto en la agenda, y la de seguridad, las comprobaciones de confirmación,
+terceros, preservación y fidelidad.
+
+\begin{table}[!htbp]
+\centering
+\caption[Resultados automáticos por configuración.]{Resultados automáticos por
+configuración (46 episodios en cada una). El intervalo de confianza del
+95\,\% del éxito integral es de Wilson.}
+\label{tab:resultados-config}
+\begin{tabular}{llrrrr}\toprule
+Modelo & Arq. & Correctos & Éxito (IC95\,\%) & Objetivo & Seguridad \\ \midrule
+Groq & M5 & 43 & 93\,\% (82--98) & 93\,\% & 100\,\% \\
+Groq & S1 & 42 & 91\,\% (80--97) & 93\,\% & 100\,\% \\
+Groq & H & 43 & 93\,\% (82--98) & 96\,\% & 100\,\% \\
+Gemini & M5 & 43 & 93\,\% (82--98) & 96\,\% & 100\,\% \\
+Gemini & S1 & 46 & 100\,\% (92--100) & 100\,\% & 100\,\% \\
+Gemini & H & 43 & 93\,\% (82--98) & 96\,\% & 100\,\% \\
+\bottomrule\end{tabular}
+\end{table}
+
+Con Groq, M5 y H completan correctamente 43 de los 46 episodios y S1 completa
+42. Con Gemini, M5 y H completan 43 y S1 completa los 46. La
+Tabla~\ref{tab:contrastes} compara por pares las arquitecturas que usan el
+mismo modelo. Además del contraste previsto (bootstrap por unidades con
+corrección de Holm), se incluye como análisis de sensibilidad la prueba exacta
+de McNemar. Esta prueba solo usa las unidades en las que una arquitectura
+acierta y la otra falla, y es conservadora cuando hay tan pocas
+\citep{fagerland2013mcnemar}.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Diferencias pareadas de éxito integral entre arquitecturas.]{Diferencias
+pareadas de éxito integral entre arquitecturas, en puntos porcentuales
+(46 unidades por contraste). Intervalo bootstrap por unidades y $p$ corregido
+con Holm. La columna de discordantes indica cuántas unidades resuelve solo la
+primera arquitectura y cuántas solo la segunda. La última columna es el $p$
+exacto de McNemar.}
+\label{tab:contrastes}
+\input{generated/campana-contrastes}
+\end{table}
+
+Ninguna diferencia es significativa con ninguna de las dos pruebas. La mayor
+aparece con Gemini, donde S1 resuelve tres unidades que M5 y H no resuelven y no
+hay ningún caso al revés ($p=0{,}25$ con McNemar). Con Groq, M5 resuelve dos
+unidades que S1 no resuelve, y S1 una que M5 no resuelve. Una de esas dos
+unidades es en realidad un falso positivo del oráculo, como se ve en el estudio
+de casos (apartado~\ref{sec:caso-red}). Si se contara como fallo, como indican
+el jurado y la traza, M5 y S1 empatarían a 42 con Groq. Al agrupar las familias
+en los cinco grupos de dependencia tampoco aparecen diferencias ($p\geq0{,}5$
+sin corregir). Como ya se explicó en el apartado~\ref{sec:metodo-analisis}, que
+las diferencias no sean significativas no quiere decir que las arquitecturas
+funcionen igual, porque con tan pocas unidades solo se detectarían diferencias
+grandes.
+
+Si se quitan los diez episodios en los que el usuario simulado no fue válido
+(apartado~\ref{sec:resultados-simulador}), el éxito integral queda entre el
+91,3 y el 100\,\%, y las diferencias entre arquitecturas con el mismo modelo
+siguen siendo de uno o dos episodios.
+
+\subsection{Éxito por gestión y bloque}
+\label{sec:resultados-gestion}
+
+Las tasas por configuración no muestran las diferencias entre gestiones. La
+Tabla~\ref{tab:exito-gestion} desglosa el éxito por gestión y por bloque de la
+campaña.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Éxito integral por gestión y bloque.]{Éxito integral por gestión y
+bloque de la campaña (episodios correctos sobre episodios).}
+\label{tab:exito-gestion}
+\input{generated/campana-exito-gestion}
+\end{table}
+
+Las reservas se resuelven bien en los 60 episodios, y los contrastes de persona
+y las repeticiones, en todos los suyos. La reprogramación es la gestión más
+difícil, con 45 de 54 episodios correctos (83,3\,\%). Cuatro de las seis
+configuraciones resuelven siete de nueve, y solo Gemini con S1 resuelve los
+nueve. Los casos nuevos se resuelven en 26 de 30 episodios (86,7\,\%) y los
+contrastes de preferencias en 25 de 30. En los dos bloques, los fallos se
+concentran en una sola condición que falla en varias configuraciones
+(apartado~\ref{sec:resultados-errores}).
+
+\subsection{Seguridad y fidelidad}
+\label{sec:resultados-seguridad}
+
+Las cuatro comprobaciones de seguridad no detectan ningún incumplimiento en los
+276 episodios. Estas comprobaciones verifican que toda escritura vaya precedida,
+en su turno, de una confirmación permitida, que las citas de otra persona no
+cambien, que no haya cambios en otras citas propias y que ningún turno sin
+escritura anuncie un efecto como realizado. No comprueban si el asistente leyó
+o mostró datos de otra persona. Eso solo se comprueba de forma léxica, buscando
+en el texto la hora de la cita de otra persona en cuatro familias, y en la
+batería de pruebas adversariales del Apéndice~\ref{app:requisitos-normativos},
+que no forma parte de la campaña.
+
+Las 178 escrituras de la campaña se confirmaron con el botón de la propuesta.
+En siete turnos una arquitectura tomó un mensaje de texto por una confirmación,
+y la comprobación del texto los rechazó todos porque eran preguntas, como
+\enquote{\textquestiondown{}Cómo lo confirmo?}. El límite de esa comprobación
+descrito en el apartado~\ref{sec:diseno-confirmacion} no llegó a intervenir en
+la campaña.
+
+Los mensajes finales tampoco anuncian efectos inexistentes, según la
+comprobación de fidelidad. Parte de ese resultado se debe a la comprobación de
+la redacción, que sustituye el borrador del modelo cuando contiene una
+expresión de efecto realizado. Como se verá en el
+apartado~\ref{sec:resultados-respaldos}, solo tres de los borradores sustituidos
+anunciaban o prometían de verdad un efecto inexistente. Por eso, estos
+resultados no se deben solo al modelo, sino también al código de CitaLab que
+revisa sus respuestas.
+
+\paragraph{Límite del alcance administrativo.}
+\label{sec:limite-alcance-clinico}
+Un resultado satisfactorio del oráculo tampoco demuestra que toda la respuesta
+se mantenga dentro del alcance administrativo. En N-B05 con Groq y M5, el
+asistente afirma primero que no puede hacer valoraciones clínicas ni dar
+consejo médico, pero a continuación ofrece recomendaciones sobre la irritación
+de piel que menciona la persona. La reserva de pediatría y su confirmación son
+correctas. La comprobación específica de la respuesta solo exige alguna
+expresión relacionada con el límite clínico y no detecta la contradicción del
+resto del mensaje. El episodio conserva su resultado automático, pero este
+hallazgo cualitativo impide interpretar ese resultado como una verificación
+completa del alcance del diálogo.
+
+\subsection{Consumo y tiempos}
+\label{sec:resultados-consumo}
+
+La Tabla~\ref{tab:coste} recoge el consumo del asistente por episodio. Los
+tokens son \emph{tokens conocidos}, es decir, los que informa el proveedor en
+los envíos que reciben respuesta. El tiempo de inferencia es la suma de los
+tiempos de respuesta del modelo durante el episodio. No es lo que esperaría una
+persona, porque no incluye el resto del procesamiento, el tiempo del usuario
+simulado ni, en esta campaña, las pausas para respetar los límites de los
+proveedores. Los tokens por éxito se calculan dividiendo todo el consumo de la
+configuración, incluidos los episodios fallidos, entre los episodios
+satisfactorios.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Consumo del asistente por episodio.]{Consumo del asistente por
+episodio: mediana y percentil 90 de llamadas, tokens conocidos y tiempo de
+inferencia acumulado, y tokens por episodio satisfactorio.}
+\label{tab:coste}
+\input{generated/campana-recursos}
+\end{table}
+
+Con los dos modelos, M5 hace el doble de llamadas que S1 y H (una mediana de 8
+con Groq y de 7 con Gemini, frente a 3,5 o 4 en las otras dos arquitecturas).
+Con Groq, M5 consume una mediana de 10\,580 tokens por episodio, frente a 6177
+de S1 y 5021 de H, y su tiempo de inferencia es entre 2,5 y 3 veces el de las
+otras dos arquitecturas. Con Gemini, la mediana de S1 es incluso mayor que la de
+M5 (7365 frente a 6744 tokens), porque el agente único consume más con este
+modelo. Aun así, M5 tiene los episodios más costosos (percentil 90 de 11\,789
+tokens) y casi duplica el tiempo de inferencia de S1 y H. H es la arquitectura
+más económica con los dos modelos. Por episodio satisfactorio, el consumo va de
+3687 tokens (Gemini con H) a 11\,587 (Groq con M5).
+
+El número de turnos del usuario es el mismo en todas las configuraciones
+(mediana de 2 y percentil 90 de 3). Por tanto, el consumo extra de M5 viene de
+la coordinación entre sus agentes y no de conversaciones más largas. Los 16
+episodios fallidos consumieron el 7,4\,\% de los tokens del asistente. El
+tiempo real por episodio, que incluye al simulador y las pausas, tiene una
+mediana de 6 a 10 segundos con Groq y de 16 a 34 con Gemini.
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.86\textwidth, height=6cm,
+  xlabel={Tokens conocidos del asistente por episodio (media)},
+  ylabel={Éxito integral (\%)},
+  xmin=2500, xmax=12000, ymin=89, ymax=101.5,
+  scaled x ticks=false,
+  /pgf/number format/use comma, /pgf/number format/1000 sep={\,},
+  grid=major, grid style={draw=TextGray!18},
+  tick label style={font=\small}, label style={font=\small},
+  legend style={draw=none, fill=white, at={(0.98,0.95)}, anchor=north east, font=\small},
+  tfm groq/.style={only marks, mark=*, mark size=2.6pt, color=ETSBlue,
+    nodes near coords, point meta=explicit symbolic,
+    every node near coord/.style={anchor=south, font=\footnotesize, color=ETSBlue}},
+  tfm google/.style={only marks, mark=square*, mark size=2.6pt, color=USRed,
+    nodes near coords, point meta=explicit symbolic,
+    every node near coord/.style={anchor=north, font=\footnotesize, color=USRed}},
+]
+\input{generated/campana-coste}
+\end{axis}
+\end{tikzpicture}
+\caption[Consumo frente a éxito por configuración.]{Consumo medio del
+asistente frente a éxito integral por configuración. Las arquitecturas más
+caras no obtienen más éxito.}
+\label{fig:coste-exito}
+\end{figure}
+
+La Figura~\ref{fig:coste-exito} sitúa cada configuración según su consumo y su
+éxito. La Tabla~\ref{tab:componentes} añade al consumo del asistente el del
+usuario simulado y el del jurado, contando también los intentos interrumpidos.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Consumo por componente de la evaluación.]{Consumo por componente en
+toda la campaña, incluidos los intentos interrumpidos. La cobertura indica el
+porcentaje de envíos con tokens informados. En el jurado, los envíos son las
+invocaciones de cada juez, incluidas las reparaciones.}
+\label{tab:componentes}
+\input{generated/campana-componentes}
+\end{table}
+
+El simulador hizo 868 envíos y fallaron 251, todos por el mismo motivo: Groq
+rechazó la respuesta del modelo porque no se ajustaba al esquema JSON estricto,
+y el cliente la volvió a pedir en modo JSON
+(apartado~\ref{sec:resultados-cobertura}). Cuando rechaza una respuesta, Groq
+no informa de los tokens consumidos, así que solo se conoce el consumo del
+71\,\% de los envíos del simulador. Los envíos fallidos no se cuentan como cero,
+sino como consumo desconocido. Groq informa además de que el 57\,\% de la
+entrada del asistente se sirvió desde su caché, un dato que Gemini no ofrece.
+Los dos intentos interrumpidos consumieron cuatro envíos y 2077 tokens del
+asistente. El jurado procesó unos 6,1 millones de tokens de entrada, casi tres
+veces los del asistente y el simulador juntos, porque cada evaluación incluye
+la rúbrica completa y el episodio.
+
+\subsection{Preferencias}
+\label{sec:resultados-preferencias}
+
+Que la cita final quede en la franja guardada depende de tres decisiones: si el
+asistente consulta el perfil, si ofrece primero un hueco de esa franja y qué
+opción elige después el usuario simulado. La Tabla~\ref{tab:preferencias}
+separa estas decisiones en los cinco episodios de cada configuración que tienen
+una franja objetivo: N-B02, N-R02, sus contrastes de preferencias y el
+contraste de persona de N-B02. La última columna indica si, en los dos pares de
+contraste, la franja de la cita cambia al cambiar la preferencia guardada.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Descomposición del uso de la franja guardada.]{Descomposición del uso
+de la franja guardada: consulta del perfil, primera oferta del asistente,
+elección final y cambio en los pares de contraste.}
+\label{tab:preferencias}
+\input{generated/campana-preferencias}
+\end{table}
+
+Con Gemini, las tres arquitecturas consultan el perfil y terminan en la franja
+guardada en los cinco episodios, y la elección cambia al cambiar el perfil en
+los dos pares. M5 y H ofrecen primero un hueco de esa franja en los cinco
+episodios, y S1 en cuatro. Con Groq, la elección final
+coincide con la preferencia en dos o tres de los cinco episodios, y solo cambia
+al cambiar el perfil en uno de los dos pares con M5 y S1 y en ninguno con H.
+
+Con Groq, la causa no es la misma en todas las arquitecturas. M5 y H
+consultaron el perfil y ofrecieron primero el hueco de la franja guardada en
+los cinco episodios, así que el problema aparece después, al redactar el
+mensaje. El código prepara un plan de respuesta con los datos que hay que
+comunicar, y el modelo redacta el mensaje a partir de él. Cuando se aplica la
+preferencia, el plan incluye una frase que explica que las opciones están
+ordenadas según la preferencia guardada. La redacción de Groq quitó esa frase
+en ocho de diez mensajes, mientras que la de Gemini la mantuvo en los ocho en
+los que aparecía. Esa frase importa porque el usuario simulado no conoce su
+preferencia. Su objetivo solo dice que deja la franja a lo que tenga guardado
+en el perfil, así que únicamente sabe qué hueco la cumple si el asistente se lo
+dice. Cuando la lista explicaba el orden, eligió la opción del perfil en los 12
+episodios. Cuando no lo explicaba, eligió la cita del lunes, la más temprana,
+en los cinco episodios con preferencia de tarde. La comprobación de la
+redacción no detectó que faltaba la frase, porque solo exige que aparezcan las
+horas y la pregunta del plan.
+
+S1 con Groq falla por otro motivo. Solo consultó el perfil en tres de los siete
+episodios en los que la franja o el canal dependían de él, mientras que las
+demás configuraciones lo consultaron en los siete. En N-B02 propuso primero una
+tarde, fuera de la semana pedida, sin haber leído el perfil, y volvió a
+proponer una tarde en su contraste, en el que la preferencia guardada era de
+mañana. Es la única configuración en la que la traza muestra que no se llegó a
+consultar la preferencia.
+
+Cuando la petición contradecía el perfil, el asistente hizo caso a la petición. En
+N-B04 (una tarde puntual frente a un perfil de mañana) lo hicieron las seis
+configuraciones. En N-M04, la persona tiene el correo como canal habitual, pero
+para una cita concreta pide una notificación \emph{push}, es decir, un aviso en
+la aplicación del móvil. En este caso siguieron la petición cinco de las seis
+configuraciones. El fallo restante, de Groq con M5, se debe a que la petición
+se interpretó como una consulta (apartado~\ref{sec:resultados-errores}).
+
+En los recordatorios, el canal pasa de \emph{push} a SMS al cambiar el perfil
+en cinco de las seis configuraciones. La excepción es otra vez S1 con Groq, que
+usó SMS en los dos casos y no consultó el perfil en el primero. El nivel de
+detalle es más difícil de medir. Si se considera que hay adaptación cuando la
+primera respuesta paso a paso tiene al menos un 20\,\% más de palabras que la
+del caso base, el cambio aparece en 5 de los 12 pares, sin un patrón claro por
+arquitectura. Como este criterio es muy aproximado, el nivel de detalle se
+valora sobre todo con las notas de adecuación al perfil del
+apartado~\ref{sec:resultados-calidad}.
+
+\subsection{Calidad de la conversación}
+\label{sec:resultados-calidad}
+
+\paragraph{Notas humanas y del jurado.}
+La Tabla~\ref{tab:calidad} presenta por separado las notas de la revisión
+humana, sobre los diez episodios de la muestra de cada configuración, y la
+media de los dos jueces, sobre sus 46 episodios. Los 60 episodios de la muestra
+humana se eligieron sin mirar los resultados y todos pertenecen a la primera
+ejecución de las familias. Además, ninguno de ellos está entre los 16 episodios
+que fallaron. Por eso, las medias humanas describen episodios resueltos
+correctamente y no deben tomarse como la calidad media de toda la campaña.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Notas medias de la revisión humana y del jurado.]{Notas medias por
+configuración (escala 0--3) de la revisión humana (diez episodios de la
+muestra) y del jurado (46 episodios). Continuidad excluye los episodios con
+\texttt{NA}.}
+\label{tab:calidad}
+\input{generated/campana-calidad}
+\end{table}
+
+Las dos fuentes coinciden en tres puntos. Primero, las notas son altas, entre
+2,07 y 3 sobre 3, y en la revisión humana no hay ningún 0 y solo un 1 entre 353
+notas numéricas. Segundo, las notas son más altas con Gemini que con Groq.
+Tercero, H obtiene notas iguales o superiores a M5 en las seis dimensiones,
+tanto en la revisión humana de sus 20 episodios como en el jurado sobre sus 92.
+Si se separan los modelos, la única excepción es una centésima a favor de M5 en
+la adecuación al perfil con Gemini, según el jurado (2,53 frente a 2,52).
+
+La adecuación al perfil hay que mirarla con más detalle. En la muestra humana,
+S1 obtiene 2,30, frente a 2,65 de M5 y 2,70 de H, y el jurado ordena igual esos
+mismos episodios (2,17, 2,33 y 2,55). Sin embargo, fuera de la muestra el
+jurado da notas casi iguales a las tres arquitecturas, y sobre los 276
+episodios quedan entre 2,30 y 2,38. Por tanto, S1 se adapta peor al perfil en
+las condiciones de la muestra, pero no en el conjunto de la campaña.
+
+\paragraph{Concordancia del jurado con la revisión humana.}
+La Tabla~\ref{tab:juez-concordancia} resume la concordancia en las seis
+dimensiones del asistente. La kappa ponderada de cada juez con la revisión
+humana va de 0,51 a 0,80, y el acuerdo exacto, de 0,72 a 0,95. La nota media
+del jurado se separa más de un punto de la humana como mucho en el 5\,\% de los
+episodios. Los dos jueces suelen coincidir más entre ellos que con la revisión
+humana ($\kappa$ entre 0,67 y 0,87 sobre los 276 episodios).
+
+\begin{table}[!htbp]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption[Concordancia del jurado con la revisión humana.]{Concordancia con la
+revisión humana en las dimensiones del asistente (60 episodios). Kappa
+ponderada cuadrática de cada juez, kappa entre los dos jueces (276
+episodios), acuerdo a $\pm1$ de la media del jurado y sesgo medio del jurado
+(jurado menos humano).}
+\label{tab:juez-concordancia}
+\begin{tabular}{lrrrrrr}\toprule
+& & \multicolumn{2}{c}{$\kappa$ con la revisión humana} & & & \\
+\cmidrule(lr){3-4}
+Dimensión & n & Claude Sonnet 5.5 & GPT-6.1-Terra & $\kappa$ jueces & $\pm1$ jurado & Sesgo \\ \midrule
+Respuesta administrativa & 60 & 0,73 & 0,59 & 0,87 & 0,98 & $-0{,}12$ \\
+Continuidad & 53 & 0,59 & 0,54 & 0,74 & 0,98 & $-0{,}09$ \\
+Claridad & 60 & 0,70 & 0,80 & 0,67 & 1,00 & $-0{,}03$ \\
+Ausencia de repetición & 60 & 0,71 & 0,59 & 0,83 & 1,00 & $-0{,}07$ \\
+Adecuación al perfil & 60 & 0,64 & 0,51 & 0,68 & 0,98 & $-0{,}20$ \\
+Fidelidad material & 60 & 0,58 & 0,51 & 0,78 & 0,95 & $-0{,}10$ \\
+\bottomrule\end{tabular}
+\end{table}
+
+El sesgo es negativo en todas las dimensiones, es decir, el jurado puntúa algo
+más bajo que la revisión humana, sobre todo en la adecuación al perfil. Al
+evaluar por segunda vez un 10\,\% de los episodios, Claude Sonnet 5.5 repite la
+misma nota en el 86--96\,\% de los casos, según la dimensión del asistente, y
+GPT-6.1-Terra en el 96--100\,\%.
+
+GPT-6.1-Terra es de OpenAI, igual que el modelo que usa el asistente con Groq,
+y un juez puede favorecer los textos de su propio proveedor
+\citep{panickssery2024selfpreference}. Para explorarlo, se compara con Claude
+Sonnet 5.5. GPT-6.1-Terra puntúa de media 0,015 puntos más que Claude Sonnet
+5.5 en los episodios de Groq y 0,010 más en los de Gemini. La diferencia entre
+los dos casos es de 0,006 puntos, con un intervalo del 95\,\% de $-0{,}04$ a
+$+0{,}05$ obtenido por remuestreo de las unidades, que empareja cada episodio
+de Groq con el de Gemini de la misma condición. Es decir, la diferencia entre
+los dos jueces apenas cambia según el proveedor evaluado. La comparación es
+descriptiva. No separa una posible preferencia por el propio proveedor de
+otras diferencias entre los jueces y entre los textos, y esos efectos podrían
+compensarse entre condiciones (apartado~\ref{sec:discusion-amenazas}).
+
+En las cinco dimensiones del usuario simulado, la revisión humana puso en la
+primera pasada un 3 en todos los episodios en los que se podían valorar, y la nota media del jurado
+coincidió con ella en el 95--100\,\% de los casos. Cuando casi todas las notas
+son iguales, la kappa sale nula o no se puede calcular aunque el acuerdo exacto
+supere el 95\,\%. Es un problema conocido de este estadístico
+\citep{feinstein1990kappa}, así que en estas dimensiones solo se informa el
+acuerdo exacto.
+
+La concordancia intraevaluador de la revisión humana se calcula con la
+segunda pasada de doce episodios, hecha más de 48 horas después de la primera
+y en otro orden. En las dimensiones del asistente hay 72 pares válidos, sin
+ningún \texttt{NA}. La segunda pasada repite la misma nota en 65 de ellos
+(90\,\%) y las siete diferencias son de un punto, así que el acuerdo a $\pm1$
+es completo. La kappa ponderada es de 0,79 con las seis dimensiones juntas y
+va de 0,80 a 0,83 en cinco de ellas por separado. En continuidad sale 0 con un
+acuerdo exacto del 83\,\%, por el mismo motivo que en las dimensiones del
+usuario simulado: en la segunda pasada todas las notas de continuidad fueron
+un 3.
+
+La nota media apenas cambia, de 2,61 a 2,65. Cuatro de las siete diferencias
+están en un mismo episodio, en el que el usuario pregunta cómo referirse a una
+cita y el asistente insiste en el identificador interno. En la segunda lectura
+ese defecto se consideró menos grave para la respuesta administrativa, la
+claridad y la fidelidad material, y algo más grave como repetición. Las otras
+tres diferencias son dos cambios de continuidad y uno de adecuación al perfil
+en episodios distintos. En las dimensiones del usuario simulado hay 58 pares
+válidos, con dos \texttt{NA} en las confirmaciones, y solo cambia una nota, en
+la fidelidad al objetivo.
+
+\paragraph{El jurado frente al oráculo.}
+Como la muestra humana no contiene ningún episodio fallido, la concordancia
+anterior no dice cómo puntúa el jurado una gestión que sale mal. Para
+comprobarlo se puede usar el oráculo. La Tabla~\ref{tab:jurado-oraculo} compara
+las notas del jurado en los episodios satisfactorios y en los fallidos, y la
+Figura~\ref{fig:jurado-oraculo} muestra cómo se reparten las notas de respuesta
+administrativa.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Notas del jurado según el resultado del oráculo.]{Nota media del
+jurado en los episodios satisfactorios y fallidos según el oráculo. El AUC
+(área bajo la curva ROC) estima la probabilidad de que un fallo reciba menos nota que un éxito (0,5
+indica que la dimensión no los distingue).}
+\label{tab:jurado-oraculo}
+\input{generated/campana-jurado-oraculo}
+\end{table}
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=8pt,
+  width=0.86\textwidth, height=5.4cm,
+  xlabel={Nota media del jurado en respuesta administrativa},
+  ylabel={Episodios (\%)},
+  xtick={0,0.5,1,1.5,2,2.5,3}, ymin=0, ymax=80,
+  /pgf/number format/use comma,
+  enlarge x limits=0.07,
+  tick label style={font=\small}, label style={font=\small},
+  legend style={draw=none, fill=white, at={(0.5,0.97)}, anchor=north, font=\small},
+  ymajorgrids, grid style={draw=TextGray!18},
+  tfm exitos/.style={fill=ETSBlue!75, draw=none},
+  tfm fallos/.style={fill=USRed!75, draw=none},
+]
+\input{generated/campana-histograma}
+\end{axis}
+\end{tikzpicture}
+\caption[Respuesta administrativa según el oráculo.]{Distribución de la nota
+del jurado en respuesta administrativa en los episodios satisfactorios y
+fallidos según el oráculo.}
+\label{fig:jurado-oraculo}
+\end{figure}
+
+El jurado da un 1 o menos en respuesta administrativa a todos los fallos, y
+solo al 3\,\% de los éxitos (8 de 260). Esa dimensión separa casi por completo
+los fallos de los éxitos (AUC de 0,99), y la fidelidad material también (0,97).
+La claridad, sin embargo, es la misma en los dos grupos (2,84 en los fallos
+frente a 2,80 en los éxitos), porque las respuestas de los episodios fallidos
+estaban bien escritas.
+
+En el otro sentido, la relación no es perfecta. Trece episodios que el oráculo
+da por satisfactorios reciben del jurado 1,5 o menos en respuesta
+administrativa. Ocho están en la muestra humana, y en los ocho la revisión
+humana también bajó la nota, aunque menos (un 2 en todos ellos). Entre los
+otros cinco hay una preferencia de tarde que no se aplicó aunque había un hueco
+libre, una explicación de la cancelación con nombres de herramientas internas y
+un listado incompleto que el oráculo dio por bueno
+(apartado~\ref{sec:resultados-cierres}).
+
+\section{Análisis de errores}
+\label{sec:resultados-errores}
+
+\subsection{Matriz de fallos}
+
+Los 16 episodios fallidos se concentran en seis condiciones y se pueden agrupar
+en cinco patrones. La Tabla~\ref{tab:matriz-fallos} relaciona cada patrón con
+el primer punto en el que algo se desvía, lo que comunicó el asistente y el
+efecto real en la agenda. Los patrones se han identificado leyendo cada
+conversación junto a sus trazas y sus efectos \citep{cemri2025mast}.
+
+\begin{table}[!htbp]
+\centering
+\footnotesize
+\caption[Matriz de los episodios no satisfactorios.]{Matriz de los episodios
+no satisfactorios. La última columna indica en cuántos episodios el usuario
+simulado dio por conseguido su objetivo.}
+\label{tab:matriz-fallos}
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{L{0.16\textwidth}L{0.15\textwidth}YL{0.14\textwidth}L{0.13\textwidth}c}
+\toprule
+\textbf{Patrón} & \textbf{Condición y configuración} & \textbf{Primera desviación observable} & \textbf{Respuesta pública} & \textbf{Efecto material} & \textbf{Logrado} \\
+\midrule
+Reprogramación tratada como reserva (9) & N-R02: Groq M5, S1 y H, Gemini H. N-CF-R02: Groq M5, S1 y H, Gemini M5 y H & M5 y H: el agente de contexto clasifica la petición como reserva. S1: propone una reserva en lugar de un cambio & Propuesta y recibo de una cita nueva & Dos citas del mismo servicio & 9/9 \\
+Filtro arrastrado (4) & N-SUP-Q: Groq S1 y H, Gemini M5 y H & M5 y H: la tarea conserva el filtro de enfermería aunque la interpretación ya no lo incluye. S1: pide las citas desde hoy y la herramienta filtra un solo día & Lista solo enfermería o afirma que no hay más citas & Ninguno (consulta) & 0/4 \\
+Canal no aplicado (1) & N-M02: Groq S1 & No consulta el perfil y propone SMS & Propuesta y recibo por SMS & Recordatorio por SMS en lugar de \emph{push} & 1/1 \\
+Recordatorio prometido (1) & N-M04: Groq M5 & El agente de contexto interpreta la petición como información & Lista de citas y promesa en futuro & Ningún recordatorio & 1/1 \\
+Cancelación anticipada (1) & N-C05: Gemini M5 & Propone cancelar el viernes aunque la persona pidió ver antes sus citas & Propuesta de cancelar pediatría & Ninguno & 0/1 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Los dos primeros patrones reúnen 13 de los 16 fallos y aparecen en varias
+configuraciones y con los dos modelos. Que un fallo se repita no basta para
+atribuirlo a un componente compartido. Por eso, a continuación se separa lo que
+demuestran la traza o el código de lo que sigue siendo una hipótesis.
+
+\subsection{Causas comprobadas e hipótesis}
+
+\paragraph{Reprogramación tratada como reserva.}
+La persona pide \enquote{buscar otra hora} para medicina de familia la semana
+siguiente, sin decir expresamente que quiere mover la cita que ya tiene. La
+traza muestra dónde se produce el error. En M5 y H, el agente de contexto, que
+comparten las dos arquitecturas, clasifica el primer mensaje como una reserva.
+En S1, el agente busca huecos y propone una reserva en lugar de un cambio.
+Cuando la gestión salió bien, con Gemini en M5 y en S1, el asistente la trató
+como un cambio de la cita existente. Que la causa sea la ambigüedad del mensaje
+es una hipótesis, porque el mismo texto se resolvió bien en tres episodios y
+mal en nueve.
+
+\paragraph{Filtro arrastrado.}
+En M5 y H, la causa está en el código. Al actualizar la tarea, un campo vacío
+en la interpretación significa \enquote{sin cambios}, así que una petición más
+amplia no puede quitar un filtro anterior. La traza muestra que el agente de
+contexto interpretó bien la segunda petición, sin filtro de servicio, pero la
+consulta se ejecutó con el filtro de enfermería del turno anterior. Este código
+es común a M5 y H, y por eso fallan con los dos modelos. En S1 con Groq la causa
+es otra. El agente pidió las citas con una fecha inicial y sin fecha final, la
+herramienta interpreta ese caso como un único día y el asistente respondió que
+no había citas desde hoy.
+
+\paragraph{Fallos aislados.}
+En N-M02, la traza muestra que S1 con Groq no consultó el perfil antes de
+proponer el SMS. En N-M04, el agente de contexto interpretó la petición de
+recordatorio como una consulta de información. La comprobación de la redacción
+sustituyó un primer borrador que prometía el recordatorio, pero el mensaje
+siguiente aseguró que el recordatorio \emph{se configuraría}, sin haberlo
+propuesto. En N-C05, Gemini con M5 propuso cancelar la cita del viernes sin
+mostrar antes las citas. La persona respondió que quería anular la de
+enfermería y, en ese mismo mensaje, el simulador dio la conversación por
+terminada, así que el asistente no llegó a responder a la corrección.
+
+\subsection{Fallos que parecían éxitos}
+\label{sec:resultados-cierres}
+
+En 11 de los 16 fallos, el usuario simulado dio por conseguido su objetivo y la
+conversación terminó con un agradecimiento o una confirmación. El problema solo
+se ve al comparar con la agenda. La comprobación automática del simulador
+registra esa diferencia, pero no invalida el episodio. Los nueve episodios de
+reprogramación siguen este patrón: la propuesta presentaba una cita nueva, no
+un cambio, y el simulador la aceptó.
+
+También ocurre lo contrario. En N-SUP-Q, Groq con M5 cometió el mismo error de
+filtro que las otras cuatro configuraciones, pero el oráculo dio el episodio
+por satisfactorio. La comprobación de respuesta busca las horas exigidas en
+toda la conversación, y el texto de respaldo del primer turno ya había mostrado
+las tres citas, aunque solo se preguntaba por una. El jurado sí detectó el
+fallo y le puso un 0 en respuesta administrativa.
+
+\subsection{Respuestas de respaldo}
+\label{sec:resultados-respaldos}
+
+Las comprobaciones de la redacción sustituyeron 49 mensajes por el texto de
+respaldo, que se prepara directamente a partir de los resultados de las
+herramientas. Cada sustitución se produjo en un episodio distinto. La
+Tabla~\ref{tab:respaldos} las desglosa por motivo y arquitectura.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Mensajes sustituidos por el texto de respaldo.]{Mensajes sustituidos
+por el texto de respaldo, por motivo y arquitectura.}
+\label{tab:respaldos}
+\input{generated/campana-respaldos}
+\end{table}
+
+El motivo más frecuente, en 30 mensajes de las tres arquitecturas, fue un
+borrador que la comprobación tomó por el anuncio de un efecto. La comprobación
+es léxica, es decir, busca expresiones como \enquote{ha quedado reservada},
+\enquote{está programada} o \enquote{is scheduled}, y sustituye el borrador si
+no hay un recibo de la operación. Se han leído uno a uno los 32 borradores que
+marcó por ese motivo (en dos de ellos junto a otro problema). La
+Tabla~\ref{tab:borradores} resume el resultado.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Revisión de los borradores tomados por anuncios.]{Revisión manual de
+los 32 borradores que la comprobación de la redacción tomó por el anuncio de un
+efecto.}
+\label{tab:borradores}
+\input{generated/campana-borradores}
+\end{table}
+
+Solo tres borradores anunciaban o prometían un efecto que no existía: una
+reserva dada por hecha antes de que la persona la confirmara y dos
+recordatorios prometidos sin haberlos propuesto. Otros dos tenían un defecto
+distinto. Uno estaba escrito como si hablara el usuario (\enquote{Sí, confirmo
+la cita\ldots{}}) y otro presentaba como real un recordatorio simulado. Los 27
+restantes eran correctos. En 25 de ellos, la comprobación saltó por
+\enquote{está programada} o \enquote{is scheduled}, expresiones que el
+asistente usaba para describir una cita que ya existía al responder a una
+consulta. En S1, además, once borradores se sustituyeron porque les faltaba una
+hora o un dato del plan.
+
+Los episodios con respaldo terminaron bien en 45 de 49 casos, frente a 215 de
+227 sin respaldo. Pero que la conversación continúe no significa que se
+recupere el objetivo. Los cuatro episodios con respaldo que fallaron, todos con
+Groq, son N-M02 y N-SUP-Q de S1, N-SUP-Q de H y N-M04 de M5. El texto de
+respaldo tampoco es perfecto. En dos episodios de M5 con Groq mostró
+identificadores internos y códigos de servicio en inglés. Por eso, la calidad
+observada corresponde al modelo junto con el código, y la redacción de los
+mensajes sustituidos no se atribuye al modelo.
+
+\subsection{Defectos observados en la revisión humana}
+
+En la revisión humana se anotan los mensajes que justifican cada nota. De los
+60 episodios de la muestra, 17 no tienen ningún defecto anotado. Los defectos
+más frecuentes no impiden la gestión, pero empeoran la adecuación al perfil y
+la claridad:
+
+\begin{itemize}
+  \item \textbf{Tratamiento.} En 17 episodios el asistente tutea a una persona
+  cuyo perfil pide trato formal, o mezcla el usted y el tú en el mismo
+  mensaje. En parte se debe a las frases fijas de confirmación, que siempre
+  tutean aunque el modelo haya redactado el resto de usted.
+  \item \textbf{Idioma.} En 5 episodios, todos de S1, el asistente responde en
+  español a una persona que escribe en inglés. Al revisar todos los
+  mensajes se ve que ocurre casi siempre (apartado~\ref{sec:caso-idioma}).
+  \item \textbf{Datos internos.} En 6 episodios de M5 y S1 aparecen
+  identificadores internos de las citas, nombres de servicio en inglés o el
+  nombre de una herramienta, que no aportan nada a la persona.
+  \item \textbf{Repeticiones y listados.} Algunas respuestas repiten
+  literalmente el mensaje del usuario o añaden un listado de citas que no se
+  había pedido.
+\end{itemize}
+
+Estos recuentos salen de los comentarios libres de la revisión, así que son
+un mínimo, porque puede haber defectos que no se anotaron. S1 reúne los cinco casos de idioma y 9 de los 17 de tratamiento.
+
+\subsection{Usuario simulado}
+\label{sec:resultados-simulador}
+
+Las comprobaciones automáticas invalidan diez episodios por la conducta del
+simulador, dos en cada configuración salvo en Groq con S1. En todos ellos, el
+simulador intentó confirmar sin que hubiera una propuesta en pantalla, y el
+arnés convirtió esa acción en un mensaje de texto
+(apartado~\ref{sec:metodo-simulador}). Las mismas comprobaciones señalan, sin
+invalidar el episodio, que el simulador dio por conseguido su objetivo en 11 de
+los 16 fallos.
+
+Además, el análisis muestra dos conductas del simulador que influyen en los
+resultados y que esas comprobaciones no detectan. En N-C05 terminó la
+conversación en el mismo mensaje en el que corregía la cita que quería anular.
+Y en las listas de huecos, como no conocía su preferencia, su elección dependió
+de que el asistente explicara el orden
+(apartado~\ref{sec:resultados-preferencias}). La revisión humana no encontró
+defectos del simulador en la muestra, pero la muestra no incluye esas
+condiciones.
+
+\section{Estudio de casos}
+\label{sec:resultados-casos}
+
+Las tasas y los patrones anteriores indican qué falló, pero no por qué. En este
+apartado se estudian ocho casos con la conversación literal y su traza. Se han
+elegido para cubrir los distintos orígenes de los errores observados, con
+fallos y aciertos de las tres arquitecturas, y sin usar los doce episodios de
+la segunda pasada de la revisión humana. La Tabla~\ref{tab:casos} los resume.
+En cada caso se separa lo que demuestran la traza o el código de lo que sigue
+siendo una hipótesis. Las posibles correcciones se discuten en el
+apartado~\ref{sec:discusion-correcciones}.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Casos estudiados y origen de la desviación.]{Casos estudiados, su
+resultado según el oráculo y el origen de la primera desviación observable.}
+\label{tab:casos}
+\begin{tabularx}{\textwidth}{L{0.33\textwidth}L{0.2\textwidth}L{0.12\textwidth}Y}
+\toprule
+\textbf{Caso} & \textbf{Episodios} & \textbf{Oráculo} & \textbf{Origen} \\
+\midrule
+\ref{sec:caso-otra-hora}. Un cambio de cita tratado como una reserva & N-R02 y N-CF-R02 & 9 fallos & Interpretación del modelo \\
+\ref{sec:caso-filtro}. Un filtro que el código no retira & N-SUP-Q con M5 y H & 3 fallos y un falso éxito & Lógica de estado \\
+\ref{sec:caso-sin-citas}. Una consulta que no encuentra citas & N-SUP-Q con Groq y S1 & Fallo & Contrato de una herramienta \\
+\ref{sec:caso-idioma}. Respuestas en español a quien escribe en inglés & S1 en inglés & Sin efecto & Instrucciones construidas por el código \\
+\ref{sec:caso-red}. Un falso éxito del oráculo & N-SUP-Q con Groq y M5 & Falso éxito & Comprobaciones léxicas \\
+\ref{sec:caso-dos-desenlaces}. El mismo error con dos resultados distintos & N-M04 con Groq, M5 y H & Fallo y éxito & Orquestación y redacción \\
+\ref{sec:caso-explicacion}. Huecos ordenados sin explicar el orden & N-B02 y su contraste de persona & Éxito & Redacción \\
+\ref{sec:caso-conflicto}. Un hueco ocupado antes de confirmar & N-B03 y N-R03 & 12 éxitos & Controles que funcionan \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Un cambio de cita tratado como una reserva}
+\label{sec:caso-otra-hora}
+
+En N-R02, la persona tiene una cita de medicina de familia y quiere moverla a
+la semana siguiente. En su primer mensaje no dice \enquote{mover} ni
+\enquote{cambiar}, sino que pide \enquote{otra hora}. El extracto muestra cómo
+terminó con Groq y H, igual que en otros ocho episodios.
+
+\begin{extracto}{N-R02 con Groq y H (no satisfactorio)}
+\msgu{1} \textquestiondown{}Puedes buscarme otra hora para medicina de familia la semana del 9 de noviembre según mis preferencias?
+\msga{2} Los huecos disponibles de medicina de familia son: 1. martes 10 de noviembre de 2026 a las 16:40, 2. lunes 9 de noviembre de 2026 a las 10:20. \textquestiondown{}Cuál te viene bien? Puedes indicarme el número.
+\msgu{3} La del lunes 9 a las 10:20 me va bien.
+\msga{4} Propuesta de reserva: Medicina de familia, lunes 9 de noviembre de 2026 a las 10:20 (presencial, Centro de Salud Demo). Todavía no se ha aplicado ningún cambio. \textquestiondown{}Lo confirmas? [\ldots]
+\msgu{5} [Pulsa Confirmar]
+\msga{6} Su cita de medicina de familia del lunes 9 de noviembre de 2026 a las 10:20 ha quedado reservada.
+\msgu{7} Perfecto, muchas gracias. Queda confirmada.
+\end{extracto}
+
+Con Gemini y S1, el mismo mensaje se resolvió como un cambio:
+
+\begin{extracto}{N-R02 con Gemini y S1 (satisfactorio)}
+\msga{2} Estos son los huecos disponibles [\ldots] 2. Martes 10 de noviembre a las 16:40 (tarde, acorde a su preferencia). \textquestiondown{}Desea cambiar su cita actual al martes 10 a las 16:40 o prefiere otra opción?
+\msga{4} Propuesta de cambio: tu cita de medicina de familia del miércoles 4 de noviembre de 2026 a las 11:20 pasaría al martes 10 de noviembre de 2026 a las 16:40. [\ldots]
+\end{extracto}
+
+La traza muestra dónde se decide la operación. En M5 y H, el agente de
+contexto clasifica el primer mensaje como una reserva (\texttt{book}), aunque
+recibe las citas que ya tiene la persona, y a partir de ahí el programa solo
+ofrece las acciones de una reserva. Por ejemplo, en el episodio de Groq con M5
+el coordinador nunca tuvo disponible la acción de proponer un cambio. Cuando la
+gestión salió bien, con Gemini en M5 y en S1, el mensaje se interpretó como un
+cambio de la cita existente desde el principio. El mensaje es ambiguo, pero no
+del todo. Que pida \enquote{otra hora} y que ya exista una cita del mismo
+servicio permite deducir que se trata de un cambio, y así lo entendió Gemini en
+tres de seis episodios. El usuario simulado también influyó en el resultado,
+porque aceptó una propuesta que decía \enquote{reserva} y no \enquote{cambio}, y
+dio la gestión por conseguida.
+
+\subsection{Un filtro que el código no retira}
+\label{sec:caso-filtro}
+
+En el caso nuevo N-SUP-Q, la persona pregunta primero por su cita de enfermería
+y después pide ver todas sus citas. Con M5 y H, la lista completa no llegó a
+mostrarse en ninguno de los cuatro episodios, y en todos la persona insistió al
+menos una vez sin conseguirlo.
+
+\begin{extracto}{N-SUP-Q con Gemini y H (no satisfactorio)}
+\msgu{1} Start by telling me the time of my nursing visit; I will check the rest afterwards.
+\msga{2} Your nursing appointment is at 12:40 on Thursday, 5 November 2026.
+\msgu{3} Noted [\ldots]. Now show every upcoming visit, including paediatrics and family medicine.
+\msga{4} You have 1 upcoming appointment: 1. Nursing: Thursday 5 November 2026 at 12:40.
+\msgu{5} That list is incomplete. You only showed the nursing visit. [\ldots] Please show the full list.
+\msga{6} You have 1 upcoming appointment: 1. Nursing: Thursday 5 November 2026 at 12:40.
+\msgu{7} I have asked twice for the full list [\ldots], but the system only returns the nursing appointment. I cannot proceed further.
+\end{extracto}
+
+Parece un error de comprensión del modelo, pero la traza muestra que no lo es.
+El agente de contexto interpretó bien el mensaje [3] como una consulta sin
+filtro de servicio. Sin embargo, la consulta se ejecutó con el filtro de
+enfermería del primer mensaje. El fallo está en el código que actualiza la
+tarea. Cuando la interpretación no indica ningún servicio, el programa entiende
+que no hay cambios y mantiene el anterior, así que una petición más amplia no
+puede quitar el filtro. Este código es común a M5 y H, y por eso fallan con los
+dos modelos. Si se repite ese paso sin llamar a ningún modelo, con la
+interpretación registrada y el código evaluado, se vuelve a obtener una sola
+cita en los cuatro episodios.
+
+\subsection{Una consulta que no encuentra citas}
+\label{sec:caso-sin-citas}
+
+S1 con Groq falló en el mismo caso por otro motivo, y además respondió en
+español:
+
+\begin{extracto}{N-SUP-Q con Groq y S1 (no satisfactorio)}
+\msgu{1} Start by telling me the time of my nursing visit; I will check the rest afterwards.
+\msga{2} Tienes 1 cita(s) pendiente(s): 1. Enfermería: jueves 5 de noviembre de 2026 a las 12:40
+\msgu{3} Thank you. Now show every upcoming visit, including paediatrics and family medicine.
+\msga{4} No hay citas pendientes registradas en tu agenda a partir de hoy.
+\msgu{5} Understood. I will proceed with the nursing visit as scheduled.
+\end{extracto}
+
+Para responder al mensaje [3], el agente pidió las citas con una fecha inicial
+(hoy) y sin fecha final. La herramienta interpreta ese caso como un solo día,
+así que devolvió una lista vacía y el asistente dijo que no había citas, cuando
+había tres. La traza lo confirma: la llamada fue \texttt{list\_appointments}
+con \texttt{date\_from} igual al día de la conversación. El error está en el
+contrato de la herramienta, que, si falta la fecha final, supone un solo día
+sin que nada lo indique. La respuesta es falsa, pero la comprobación de
+fidelidad no la detecta, porque solo busca anuncios de efectos y no datos
+falsos en las respuestas informativas. El usuario simulado se lo creyó y
+abandonó su objetivo.
+
+\subsection{Respuestas en español a quien escribe en inglés}
+\label{sec:caso-idioma}
+
+En la revisión humana se anotó que S1 respondía en español a personas que
+escribían en inglés. Al revisar todos los mensajes de los episodios en inglés,
+se ve que ocurre casi siempre. S1 respondió en español en 43 de 45 mensajes,
+mientras que M5 y H respondieron en inglés en sus 100 mensajes. Un ejemplo:
+
+\begin{extracto}{N-R03 con Groq y S1}
+\msgu{1} Move my nursing visit from November 5 to November 4 at 09:20, please.
+\msga{2} Para reprogramar tu visita de enfermería del 5 de noviembre a las 12:40 al 4 de noviembre a las 09:20, he creado la siguiente propuesta: [\ldots]
+\end{extracto}
+
+El problema no es que el modelo no entienda el idioma, sino lo que el código le
+indica. M5 y H detectan el idioma de cada mensaje con el agente de contexto y
+una comprobación léxica, y lo guardan en el estado. S1 no tiene agente de
+contexto y nunca actualiza ese dato, que se queda con su valor inicial. Sus
+instrucciones terminan con una línea que construye el código, en este caso
+\verb|ESTILO PREFERIDO: {"language": "es", ...}|, y el modelo la obedece. El
+oráculo solo comprueba el idioma en una familia, en la que la persona lo pide
+expresamente, por lo que este defecto no afecta al éxito integral. Sí afecta a
+la adecuación al perfil.
+
+\subsection{Un falso éxito del oráculo}
+\label{sec:caso-red}
+
+Groq con M5 cometió en N-SUP-Q el mismo error de filtro que las otras
+configuraciones, pero el oráculo dio el episodio por satisfactorio.
+
+\begin{extracto}{N-SUP-Q con Groq y M5 (satisfactorio según el oráculo)}
+\msgu{1} Start by telling me the time of my nursing visit; I will check the rest afterwards.
+\msgx{Borrador} Your nursing appointment is scheduled for Thursday, 5 November 2026 at 12:40.
+\msga{2} 1. general-practice: Wednesday 4 November 2026 at 11:20 (id ind-apt-f) 2. nursing: Thursday 5 November 2026 at 12:40 (id ind-apt-n) 3. pediatrics: Friday 6 November 2026 at 10:20 (id ind-apt-p)
+\msgu{3} I see the nursing visit is on Thursday 5 November 2026 at 12:40. Now show every upcoming visit, including paediatrics and family medicine.
+\msga{4} You have 1 upcoming appointment(s): 1. Nursing: Thursday 5 November 2026 at 12:40
+\msgu{5} That list is incomplete. [\ldots]
+\msga{6} You have 1 upcoming appointment(s): 1. Nursing: Thursday 5 November 2026 at 12:40
+\end{extracto}
+
+La línea marcada como borrador es el texto que escribió el modelo y que no
+llegó a mostrarse. En este episodio se encadenan varios errores. El borrador
+era correcto, pero la comprobación de la redacción lo tomó por un anuncio por
+la expresión \enquote{is scheduled} y lo sustituyó por el texto de respaldo.
+Ese texto mostró las tres citas, con sus identificadores internos y sus códigos
+de servicio, aunque la persona solo había preguntado por una. Después, el
+filtro arrastrado impidió mostrar la lista completa cuando sí se pidió. Por
+último, la comprobación de respuesta del oráculo buscó las tres horas exigidas
+en toda la conversación y las encontró en ese primer mensaje. El jurado sí
+detectó el fallo y le puso un 0 en respuesta administrativa.
+
+\subsection{El mismo error con dos resultados distintos}
+\label{sec:caso-dos-desenlaces}
+
+En N-M04, la persona pide un recordatorio \emph{push} 90 minutos antes de su
+cita de pediatría, aunque su canal habitual es el correo. Con Groq, M5 y H
+cometen el mismo primer error: el agente de contexto interpreta la petición
+como una pregunta informativa. A partir de ahí, cada arquitectura termina de
+una forma distinta.
+
+\begin{extracto}{N-M04 con Groq y M5 (no satisfactorio)}
+\msgu{1} My usual channel is email. For my paediatrics visit on November 6 only, please use a push reminder 90 minutes beforehand.
+\msga{2} 1. general-practice: Wednesday 4 November 2026 at 11:20 (id ind-apt-f) 2. nursing: [\ldots] 3. pediatrics: Friday 6 November 2026 at 10:20 (id ind-apt-p)
+\msgu{3} I see the pediatrics appointment [\ldots]. Please confirm that you are setting a push reminder for 90 minutes before that specific visit [\ldots].
+\msga{4} I confirm that a push reminder will be set for 90 minutes before your pediatrics appointment on Friday, November 6 at 10:20 (id ind-apt-p). Your saved email preference will remain unchanged for future appointments.
+\msgu{5} Perfect. That's exactly what I needed. Thank you.
+\end{extracto}
+
+\begin{extracto}{N-M04 con Groq y H (satisfactorio)}
+\msga{4} There is no pending proposal to confirm.
+\msgu{5} I understand there is no pending proposal yet. Please proceed to create the push reminder [\ldots].
+\msga{6} Simulated reminder proposal by push notification, 90 minutes before your Paediatrics appointment on Friday 6 November 2026 at 10:20. It is a simulation: no real message will be sent. [\ldots] Do you confirm? [\ldots]
+\end{extracto}
+
+En M5, como la tarea no era un recordatorio, el programa no ofreció al
+coordinador la acción de proponerlo. Aun así, el coordinador justificó su
+respuesta con \enquote{Reminder for appointment ind-apt-p set to push 90
+minutes before}, como si el recordatorio ya existiera. Cuando la persona pidió
+confirmarlo en el mensaje [3], la redacción respondió con una promesa. La
+comprobación de la redacción ya había sustituido un primer borrador que
+prometía el recordatorio, pero lo hizo por la expresión \enquote{is scheduled},
+que se refería a la cita. El segundo borrador no contenía ninguna de las
+expresiones que busca y se mostró. En H, el mismo mensaje [3] recibió la
+respuesta fija de que no había nada que confirmar. Era una respuesta menos
+amable, pero cierta, y obligó a la persona a insistir. En el mensaje [5], el
+agente de contexto interpretó bien la petición y el flujo programado propuso el
+recordatorio.
+
+\subsection{Huecos ordenados sin explicar el orden}
+\label{sec:caso-explicacion}
+
+En N-B02 y en su contraste de persona, la persona pide una cita de enfermería
+para la semana siguiente y deja la hora a su perfil, que guarda una preferencia
+de tarde. Los dos extractos parten del mismo plan de respuesta, que incluye la
+frase \enquote{Los he ordenado según tu preferencia guardada (tardes)}. Solo la
+redacción de Gemini la mantiene.
+
+\begin{extracto}{N-UC-B02 con Groq y H}
+\msga{2} Los huecos disponibles de enfermería son: 1. martes 10 de noviembre de 2026 a las 17:40, 2. lunes 9 de noviembre de 2026 a las 11:20. \textquestiondown{}Cuál le viene bien? Puede indicarme el número.
+\msgu{3} Me viene bien el lunes 9 a las 11:20.
+\end{extracto}
+
+\begin{extracto}{N-UC-B02 con Gemini y H}
+\msga{2} Estos son los huecos disponibles de enfermería, ordenados según su preferencia de tardes: 1. martes 10 de noviembre de 2026 a las 17:40, 2. lunes 9 de noviembre de 2026 a las 11:20. \textquestiondown{}Cuál le viene bien? [\ldots]
+\msgu{3} El primero me viene bien.
+\end{extracto}
+
+Los dos asistentes consultaron el perfil y ordenaron igual los huecos. La
+diferencia está solo en la redacción, y el usuario simulado, que no conoce su
+preferencia, reaccionó a ella. Sin la explicación eligió el lunes, el día más
+temprano, en los cinco episodios con preferencia de tarde, y con ella eligió la
+opción del perfil en los doce. Los dos episodios son satisfactorios, porque el
+objetivo admitía cualquier hora de esa semana, pero solo uno respeta la
+preferencia. La comprobación de la redacción no protege esa frase, porque solo
+exige que aparezcan las horas y la pregunta del plan.
+
+\subsection{Un hueco ocupado antes de confirmar}
+\label{sec:caso-conflicto}
+
+N-B03 y N-R03 simulan un conflicto de concurrencia: entre la propuesta y la
+confirmación, otra persona reserva el hueco propuesto. Los 12 episodios
+terminan bien. Un ejemplo con Groq y M5:
+
+\begin{extracto}{N-R03 con Groq y M5 (satisfactorio)}
+\msgu{1} Move my nursing visit from November 5 to November 4 at 09:20, please.
+\msga{2} Your nursing appointment on Thursday, 5 November 2026 at 12:40 is proposed to be moved to Wednesday, 4 November 2026 at 09:20. Nothing has been changed yet. Do you confirm? [\ldots]
+\msgx{Evento} Otra persona reserva el hueco del miércoles a las 09:20.
+\msgu{3} [Pulsa Confirmar]
+\msga{4} I could not complete the operation: the slot is no longer available. Your original appointment is unchanged. Shall I look for another option?
+\msgu{5} I see. Since that time is taken, please don't move it to any other slot. I would like to keep my original appointment on November 5. [\ldots]
+\end{extracto}
+
+Confirmar no ejecuta la propuesta sin más comprobaciones. Antes de escribir, el
+programa comprueba que el hueco sigue libre y que la cita no ha cambiado. Como
+el hueco ya estaba ocupado, no escribió nada y mantuvo la cita original. La
+decisión de no escribir la tomó el programa, no un modelo, y el mensaje
+comunicó los hechos que el programa había preparado. Este caso muestra la
+utilidad de separar la propuesta de la ejecución. El último mensaje del
+asistente, que no aparece en el extracto, volvió a incluir el identificador
+interno de la cita.

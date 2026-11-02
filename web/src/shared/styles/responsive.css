@@ -1,0 +1,466 @@
+@media (min-width: 1600px) {
+  .workspace {
+    padding-left: 55px;
+    padding-right: 55px;
+  }
+  .chat-layout.with-inspector {
+    grid-template-columns: 1.25fr 0.75fr;
+  }
+  .messages {
+    max-height: 680px;
+  }
+  .assistant-start {
+    min-height: 520px;
+  }
+  .start-primary {
+    padding: 55px;
+  }
+  .start-secondary {
+    padding: 48px;
+  }
+}
+@media (max-width: 1250px) {
+  .shell {
+    grid-template-columns: 205px minmax(0, 1fr);
+  }
+  .sidebar {
+    width: 205px;
+    padding: 28px 13px 16px;
+  }
+  .topbar {
+    padding: 0 25px;
+  }
+  .workspace {
+    padding: 28px 25px 0;
+  }
+  .topbar-right {
+    gap: 15px;
+  }
+  .chat-layout.with-inspector {
+    grid-template-columns: minmax(0, 1fr) minmax(295px, 0.8fr);
+    gap: 15px;
+  }
+  .inspector {
+    padding: 17px;
+  }
+  .call-list button {
+    gap: 7px;
+  }
+  .call-list small {
+    font-size: 0.8125rem;
+  }
+  .calendar-layout {
+    grid-template-columns: 275px minmax(0, 1fr);
+  }
+  .slot-row {
+    gap: 11px;
+  }
+  .settings-layout {
+    grid-template-columns: minmax(0, 1fr) 290px;
+  }
+  .form-grid {
+    gap: 0 16px;
+  }
+  .start-primary {
+    padding: 35px 30px;
+  }
+  .start-secondary {
+    padding: 35px 28px;
+  }
+  .page-heading {
+    flex-wrap: wrap;
+  }
+  .page-heading .actions {
+    margin-top: 0;
+  }
+}
+@media (max-width: 1050px) {
+  .chat-layout.with-inspector {
+    grid-template-columns: 1fr;
+  }
+  .inspector-metrics {
+    max-width: 450px;
+  }
+  .call-list strong {
+    font-size: 0.875rem;
+  }
+  .call-list small {
+    font-size: 0.8125rem;
+  }
+  .call-meta .status {
+    font-size: 0.8125rem;
+  }
+  .settings-layout,
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+  .calendar {
+    max-width: 390px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .settings-aside {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .slot-row {
+    flex-wrap: wrap;
+  }
+  .slot-row .status {
+    margin-left: auto;
+  }
+  .fhir-layout {
+    grid-template-columns: 210px minmax(0, 1fr);
+  }
+  .experiment-top {
+    grid-template-columns: 1fr;
+  }
+  .access-main {
+    gap: 60px;
+  }
+  .access-intro h1 {
+    font-size: 46px;
+  }
+  .topbar .academic-label {
+    display: none;
+  }
+  .guide ol {
+    grid-template-columns: 1fr;
+  }
+  .assistant-start {
+    grid-template-columns: 1fr;
+  }
+  .start-secondary {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .start-secondary .roles-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 760px) {
+  body {
+    font-size: 15px;
+  }
+  .shell {
+    display: block;
+  }
+  .sidebar {
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.2s;
+    width: 248px;
+    top: 66px;
+    border-top: 1px solid var(--border);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    visibility: visible;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar > .brand {
+    display: none;
+  }
+  .topbar {
+    height: 66px;
+    padding: 0 18px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    gap: 12px;
+  }
+  .breadcrumb {
+    display: none;
+  }
+  .mobile-brand {
+    display: block;
+    order: 2;
+    margin-right: auto;
+  }
+  .menu-toggle {
+    display: flex;
+    order: 1;
+    border: 0;
+  }
+  .topbar-right {
+    order: 3;
+  }
+  .topbar-right .environment {
+    display: none;
+  }
+  .mobile-brand .brand {
+    font-size: 23px;
+  }
+  .mobile-brand .brand small {
+    font-size: 0.8125rem;
+  }
+  .mobile-brand .brand-mark {
+    display: none;
+  }
+  .workspace {
+    padding: 25px 18px 0;
+  }
+  .page-heading {
+    margin-bottom: 23px;
+    gap: 17px;
+  }
+  h1 {
+    font-size: 27px;
+  }
+  .page-heading .lede {
+    font-size: 0.875rem;
+  }
+  .eyebrow {
+    font-size: 0.8125rem;
+  }
+  .workspace-footer {
+    font-size: 0.8125rem;
+    flex-direction: column;
+    gap: 7px;
+    padding-top: 21px;
+  }
+  .assistant-start {
+    margin-bottom: 25px;
+  }
+  .start-primary {
+    padding: 29px 24px;
+  }
+  .start-primary h2 {
+    font-size: 29px;
+  }
+  .start-primary > p {
+    font-size: 0.875rem;
+  }
+  .start-secondary {
+    padding: 29px 24px;
+  }
+  .start-secondary .roles-list {
+    grid-template-columns: 1fr;
+  }
+  .session-strip {
+    gap: 10px;
+    padding: 12px;
+  }
+  .session-strip > div {
+    flex-wrap: wrap;
+    font-size: 0.8125rem;
+  }
+  .session-strip .muted {
+    display: none;
+  }
+  .chat-panel-heading {
+    padding: 15px 17px;
+  }
+  .conversation-preferences summary,
+  .conversation-preferences-body {
+    padding-left: 17px;
+    padding-right: 17px;
+  }
+  .preference-grid {
+    grid-template-columns: 1fr;
+  }
+  .messages {
+    padding: 19px 15px;
+    max-height: 520px;
+  }
+  .message {
+    max-width: 100%;
+    font-size: 0.875rem;
+  }
+  .composer {
+    padding: 19px 15px 12px;
+  }
+  .offer-card,
+  .appointment-results {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+  .offer-card dl {
+    grid-template-columns: 1fr;
+  }
+  .appointment-results li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .appointment-results code {
+    grid-column: 2;
+    overflow-wrap: anywhere;
+  }
+  .composer .composer-note {
+    font-size: 0.8125rem;
+  }
+  .inspector {
+    padding: 20px;
+  }
+  .panel {
+    padding: 20px;
+  }
+  .section-heading {
+    flex-wrap: wrap;
+  }
+  .section-heading h2 {
+    font-size: 18px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .settings-aside {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+  .calendar {
+    max-width: 390px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .calendar-grid button {
+    height: 41px;
+  }
+  .calendar-summary {
+    margin-top: 17px;
+  }
+  .slot-row {
+    gap: 12px;
+  }
+  .slot-row .slot-time {
+    width: 70px;
+  }
+  .fhir-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .resource-list {
+    max-height: 220px;
+    border-bottom: 1px solid var(--border);
+  }
+  .info-columns {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 15px 0 25px;
+  }
+  .info-columns > div,
+  .info-columns > section {
+    padding: 0;
+  }
+  .tabs {
+    gap: 20px;
+  }
+  .tabs button {
+    font-size: 0.875rem;
+  }
+  .toolbar {
+    gap: 10px;
+  }
+  .toolbar .muted {
+    font-size: 0.8125rem;
+  }
+  .toolbar select {
+    width: 100%;
+  }
+  .search {
+    max-width: none;
+  }
+  .access-header {
+    padding: 25px;
+  }
+  .access-header .academic-label {
+    font-size: 0.8125rem;
+  }
+  .access-main {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 0 23px;
+    margin: 20px auto 35px;
+  }
+  .access-intro {
+    width: 100%;
+  }
+  .access-intro h1 {
+    font-size: 38px;
+    line-height: 1.1;
+    margin-bottom: 18px;
+  }
+  .access-intro h1 br:nth-child(2) {
+    display: none;
+  }
+  .access-intro > p:not(.eyebrow) {
+    font-size: 0.875rem;
+  }
+  .access-principles {
+    display: none;
+  }
+  .access-intro .small-print {
+    display: none;
+  }
+  .access-card {
+    padding: 25px;
+    width: 100%;
+    max-width: 520px;
+  }
+  .access-footer {
+    margin: 0 25px;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .toast {
+    left: 18px;
+    right: 18px;
+    top: 78px;
+    max-width: none;
+    font-size: 0.875rem;
+  }
+  .dialog-content {
+    padding: 22px;
+  }
+  dialog > header {
+    padding: 18px 22px;
+  }
+  dialog h2 {
+    font-size: 19px;
+  }
+  .dialog-actions {
+    flex-wrap: wrap;
+  }
+  .result-summary span {
+    margin-left: 0;
+  }
+  .run-history button {
+    flex-wrap: wrap;
+  }
+  .slot-panel button {
+    font-size: 0.8125rem;
+  }
+  .guide li {
+    gap: 13px;
+  }
+  .call-list button {
+    gap: 8px;
+  }
+  .call-list strong {
+    font-size: 0.875rem;
+  }
+  .call-list small {
+    font-size: 0.8125rem;
+  }
+  .call-list .call-meta small {
+    font-size: 0.8125rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

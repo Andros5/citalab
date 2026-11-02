@@ -1,0 +1,33 @@
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\selectlanguage{english}
+
+This Master's Thesis studies agentic AI for personalised conversational
+appointment management in a simulated healthcare setting. Its primary
+architecture, M5, distributes five LLM responsibilities: context, profiles,
+compliance, personalisation and orchestration. It is compared with S1, a
+single agent, and H, a programmed hybrid workflow. All variants share tools
+and mandatory access, confirmation and execution safeguards.
+
+The prototype uses synthetic profiles and schedules and a subset of FHIR R4
+to book, query, reschedule and cancel appointments and configure reminders
+without external delivery. Personalisation adapts responses and ranks
+compatible slots without changing permissions or operation outcomes.
+CitaLab supports interaction, call inspection and conversation review.
+
+The evaluation runs 276 episodes with two models and a simulated user,
+separate from the corpus used to adjust the instructions. Task success is
+checked against the schedule, and conversation quality is scored by a two-LLM
+jury checked against a blind human review of a sample and against the oracle. M5
+shows no significant success advantage, while its cost is systematically
+higher: twice as many calls and about 2.4 times the tokens of H, which achieves
+equal or better quality. No unconfirmed writes or changes to other people's
+appointments are observed, yet a correctly confirmed operation can still miss
+the user's intent. Conclusions are limited
+to the synthetic setting studied. Code, data and
+results are available at \url{https://github.com/Andros5/citalab}.
+
+\vspace{1em}
+\noindent\textbf{Keywords:} agentic AI, personalisation, multi-agent systems,
+healthcare appointments, FHIR, evaluation.
+\selectlanguage{spanish}

@@ -1,0 +1,55 @@
+% !TEX root = main.tex
+% !LW recipe=tectonic
+\documentclass[11pt,a4paper,twoside,openright]{book}
+
+\input{config/paquetes}
+\input{config/metadatos}
+\input{config/estilo}
+
+\begin{document}
+
+\frontmatter
+\input{frontmatter/portada}
+\cleardoublepage
+\input{frontmatter/resumen}
+\cleardoublepage
+\input{frontmatter/abstract}
+\cleardoublepage
+\input{frontmatter/declaracion-ia}
+\cleardoublepage
+\tableofcontents
+\cleardoublepage
+\listoffigures
+\addcontentsline{toc}{chapter}{Índice de figuras}
+\cleardoublepage
+\listoftables
+\addcontentsline{toc}{chapter}{Índice de tablas}
+\cleardoublepage
+\input{frontmatter/acronimos}
+
+\mainmatter
+\input{chapters/01-introduccion}
+\input{chapters/02-fundamentos}
+\input{chapters/03-dominio-y-entorno-regulado}
+\input{chapters/04-estado-arte}
+\input{chapters/05-diseno-arquitectura}
+\input{chapters/06-implementacion-citalab}
+\input{chapters/07-metodologia}
+\input{chapters/08-resultados}
+\input{chapters/09-discusion}
+\input{chapters/10-conclusiones}
+
+\appendix
+\input{appendices/requisitos-normativos}
+\input{appendices/instrumentos-revision}
+
+\backmatter
+\bibliographystyle{apacite-apa7}
+\renewcommand{\bibsection}{\chapter*{\refname}\markboth{\refname}{\refname}\addcontentsline{toc}{chapter}{\refname}}
+% APA 7: lista de referencias alineada a la izquierda, sin justificar.
+\begingroup
+\raggedright
+\bibliography{bibliography/referencias}
+\endgroup
+
+\end{document}

@@ -1,0 +1,19 @@
+# Finales de línea LF, salvo en los ficheros que se publican byte a byte.
+* text=auto eol=lf
+*.png binary
+*.pdf binary
+
+# Código, corpus y resultados de la campaña final: el manifiesto fija el hash de sus bytes,
+# así que se guardan sin convertir los finales de línea.
+src/citalab/** -text
+scripts/prepare_independent_corpus.py -text
+scripts/run_independent_campaign.py -text
+data/evaluation/independent-final-v1.json -text
+data/synthetic/profiles/sprint3_profiles.json -text
+output/evaluation/** -text
+web/public/architecture/*.html -text
+
+# Estadística de lenguajes de GitHub: los diagramas HTML de la ayuda y el estilo bibliográfico no
+# son código del proyecto.
+web/public/architecture/*.html linguist-generated
+memoria/apacite-apa7.bst linguist-vendored

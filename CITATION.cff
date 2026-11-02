@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "Si utilizas este software o sus datos, cita el Trabajo Fin de Máster."
+title: "CitaLab: IA agéntica para la gestión personalizada de citas sanitarias en entornos regulados"
+type: software
+authors:
+  - family-names: "Rubio Ramos"
+    given-names: "Andrés"
+    affiliation: "Universidad de Sevilla"
+version: "1.0.0"
+license: MIT
+repository-code: "https://github.com/Andros5/citalab"
+keywords:
+  - "IA agéntica"
+  - "sistemas multiagente"
+  - "modelos de lenguaje"
+  - "personalización"
+  - "gestión de citas sanitarias"
+  - "FHIR"
+  - "evaluación con LLM como juez"
+preferred-citation:
+  type: thesis
+  thesis-type: "Trabajo Fin de Máster"
+  title: "Agentic AI para personalización conversacional en entornos regulados"
+  authors:
+    - family-names: "Rubio Ramos"
+      given-names: "Andrés"
+  institution:
+    name: "Universidad de Sevilla"
+  department: "Ciencias de la Computación e Inteligencia Artificial"
+  year: 2026
+  url: "https://github.com/Andros5/citalab"

@@ -1,0 +1,120 @@
+\chapter[Inventario de datos y requisitos normativos]{Inventario de datos\\y requisitos normativos}
+\label{app:requisitos-normativos}
+
+Este apéndice recoge las categorías de datos de CitaLab y relaciona los requisitos derivados del marco normativo con los controles del prototipo. Se distingue entre las comprobaciones realizadas con datos sintéticos y las obligaciones que corresponderían a una implantación en el Servicio Andaluz de Salud (SAS). Las pruebas técnicas permiten verificar comportamientos concretos, pero no demuestran por sí solas el cumplimiento jurídico de un servicio sanitario real.
+
+\section{Inventario y sensibilidad de los datos}
+
+La Tabla~\ref{tab:datos-sensibilidad} recoge las categorías de datos utilizadas en CitaLab y la sensibilidad que tendría información equivalente en un sistema sanitario real. Los datos de pacientes, citas y perfiles del prototipo son sintéticos y no proceden de registros sanitarios. No deben confundirse con datos seudonimizados, que pueden seguir siendo personales cuando existe la posibilidad de identificar de nuevo a una persona \citep{eu2016gdpr}.
+
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{L{0.18\linewidth}L{0.20\linewidth}L{0.25\linewidth}L{0.27\linewidth}}
+\caption{Categorías de datos, sensibilidad en un entorno real y controles de CitaLab.}\label{tab:datos-sensibilidad}\\
+\toprule
+\textbf{Categoría} & \textbf{Ejemplos} & \textbf{Sensibilidad en un sistema real} & \textbf{Control en CitaLab} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Categoría} & \textbf{Ejemplos} & \textbf{Sensibilidad en un sistema real} & \textbf{Control en CitaLab} \\
+\midrule
+\endhead
+Identificación & Nombre e identificador de paciente sintéticos. & Datos personales identificativos. & Identidades simuladas, acceso según el rol y comprobación de permisos. \\
+Contacto & Teléfono, correo electrónico y canal preferido ficticios. & Datos personales de contacto. & Acceso limitado a la finalidad. Los recordatorios no generan envíos externos. \\
+Citas & Servicio, profesional, centro, fecha, modalidad y estado. & Datos personales que pueden revelar información sobre la salud. & Consulta y modificación autorizadas. La agenda simulada determina el estado de las citas. \\
+Motivos o síntomas & Referencias a problemas de salud en mensajes de prueba. & Datos relativos a la salud. & Exclusión de decisiones clínicas y detención de gestiones fuera del alcance administrativo. \\
+Preferencias & Idioma, franja horaria, centro, nivel de detalle y canal de comunicación. & Datos personales cuya sensibilidad depende del contenido y del contexto. & Recuperación selectiva según finalidad, procedencia, vigencia y autorización. \\
+Representación & Relación entre solicitante y paciente, permisos y caducidad. & Datos personales relativos a la identidad y autorización. & Comprobación de la representación y del alcance del permiso para cada operación. \\
+Conversaciones & Mensajes y contexto de las sesiones sintéticas. & Sensibilidad variable. Pueden contener información personal o sanitaria. & Historial de investigación separado de la traza operativa, con acceso por rol y conservación configurable. \\
+Trazas técnicas & Identificador, regla aplicada, operación, resultado y marcas temporales. & Información interna que puede ser personal si permite identificar al usuario. & Registro mínimo de operaciones y acceso restringido, sin incorporar la conversación completa. \\
+Métricas & Éxito de la gestión, latencia, llamadas, tokens y códigos de error. & Datos técnicos que pueden vincularse a una persona si conservan identificadores. & Registro por episodio sintético y presentación agregada de resultados cuando corresponde. \\
+\bottomrule
+\end{longtable}
+\normalsize
+\setlength{\tabcolsep}{6pt}
+
+\section{Matriz de requisitos derivados del marco normativo}
+
+La Tabla~\ref{tab:req-normativos} recoge las condiciones utilizadas para diseñar y evaluar los controles de CitaLab. Los requisitos \texttt{NOR-01} a \texttt{NOR-12} proceden del análisis del dominio y de la normativa aplicable al prototipo. \texttt{NOR-13} a \texttt{NOR-16} recogen las obligaciones institucionales de protección de datos, seguridad, interoperabilidad y accesibilidad consideradas en el apartado~\ref{sec:normas-aplicables}. Estos cuatro últimos requisitos están pendientes de una implantación real y no se presentan como funciones implementadas.
+
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{L{0.10\linewidth}L{0.38\linewidth}L{0.42\linewidth}}
+\caption{Requisitos normativos, comprobaciones y límites de aplicación.}\label{tab:req-normativos}\\
+\toprule
+\textbf{ID} & \textbf{Requisito} & \textbf{Comprobación o condición} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{Requisito} & \textbf{Comprobación o condición} \\
+\midrule
+\endhead
+NOR-01 & Asociar una finalidad y una habilitación configurada a cada acceso a datos. & Reglas de finalidad y licitud. Las bases jurídicas de un tratamiento real deben ser determinadas por la organización responsable. \\
+NOR-02 & Limitar los campos y categorías de datos según la operación y el rol. & Pruebas de minimización que rechazan atributos no autorizados. \\
+NOR-03 & Separar la autenticación del solicitante de su autorización sobre el paciente. & Pruebas con pacientes propios, representantes autorizados y accesos denegados. \\
+NOR-04 & Recuperar preferencias según finalidad, procedencia, vigencia y relevancia. & Pruebas de resolución de perfiles, conflictos y preferencias retiradas o caducadas. \\
+NOR-05 & Identificar el sistema como IA e informar de sus funciones y límites. & Aviso inicial y pruebas de transparencia. La formación del personal correspondería al despliegue real. \\
+NOR-06 & Impedir que el asistente adopte decisiones de elegibilidad, prioridad o triaje, o proporcione diagnóstico y tratamiento. & Reglas de alcance y pruebas adversariales que bloquean estas funciones. \\
+NOR-07 & Exigir confirmación vinculada a una propuesta antes de modificar el estado de una cita. & Pruebas que rechazan operaciones sin confirmación válida. \\
+NOR-08 & Detener gestiones fuera del alcance y orientar hacia atención humana cuando corresponda. & Bloqueo y orientación implementados. No existe transferencia efectiva a personal sanitario. \\
+NOR-09 & Utilizar la agenda como fuente del resultado de las operaciones. & Comprobación de disponibilidad, recibos y estado final. El modelo no determina por sí solo el éxito. \\
+NOR-10 & Registrar únicamente los datos necesarios para revisar una operación. & Inspección de trazas mínimas y separación respecto al historial de investigación. \\
+NOR-11 & Mantener el desarrollo y las pruebas de CitaLab dentro del entorno sintético. & Semillas sintéticas, configuración del modo de datos y pruebas de rechazo de modos incompatibles. \\
+NOR-12 & Revisar la finalidad, la clasificación normativa y los requisitos cuando cambien las funciones o condiciones de uso. & Pendiente de un procedimiento formal de revisión para una implantación real. \\
+NOR-13 & Definir las bases jurídicas, responsabilidades, información a las personas, contratos y demás garantías de protección de datos. & Pendiente de decisión institucional, incluida la evaluación de impacto cuando corresponda, conforme al RGPD y la Ley Orgánica 3/2018. \\
+NOR-14 & Aplicar las medidas de seguridad exigibles al sistema y a sus proveedores según el ENS. & Pendiente de análisis de riesgos, categorización y evaluación institucional conforme al Real Decreto 311/2022. \\
+NOR-15 & Verificar la interoperabilidad con los sistemas oficiales y los procedimientos administrativos aplicables. & Pendiente de integración y revisión conforme al ENI y, cuando proceda, a la Ley 40/2015. \\
+NOR-16 & Cumplir los requisitos de accesibilidad de la interfaz y de las interacciones. & Pendiente de evaluación conforme al Real Decreto 1112/2018 y a las disposiciones aplicables del Real Decreto 707/2026 desde su entrada en vigor. \\
+\bottomrule
+\end{longtable}
+\normalsize
+\setlength{\tabcolsep}{6pt}
+
+Los requisitos de esta tabla no tienen todos el mismo alcance. Los primeros se utilizan para comprobar reglas y operaciones del prototipo, mientras que \texttt{NOR-13} a \texttt{NOR-16} recogen condiciones de una futura prestación del servicio en el SAS. Su cumplimiento requiere decisiones, procedimientos y comprobaciones que no pueden sustituirse por pruebas de código.
+
+\section{Trazabilidad de requisitos, controles y comprobaciones}
+
+La Tabla~\ref{tab:trazabilidad-memoria} relaciona los doce requisitos \texttt{REQ-CITA} del apartado~\ref{sec:requisitos-diseno} con los controles y las pruebas documentadas. Los identificadores \texttt{NOR} señalan los requisitos normativos que fundamentan cada decisión de diseño. Los estados tienen el mismo significado que en la Tabla~\ref{tab:req-dominio-regulado}. El estado \textbf{I} indica que el requisito está implementado con pruebas documentadas. \textbf{P} señala una cobertura parcial. \textbf{L} indica que depende de las condiciones del laboratorio. \textbf{O} queda pendiente de un procedimiento organizativo.
+
+\begin{landscape}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{L{0.10\linewidth}L{0.20\linewidth}L{0.53\linewidth}L{0.09\linewidth}}
+\caption{Trazabilidad entre requisitos de diseño, controles y evidencia.}\label{tab:trazabilidad-memoria}\\
+\toprule
+\textbf{REQ-CITA} & \textbf{NOR relacionados} & \textbf{Control y comprobación documentada} & \textbf{Estado} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{REQ-CITA} & \textbf{NOR relacionados} & \textbf{Control y comprobación documentada} & \textbf{Estado} \\
+\midrule
+\endhead
+01 & NOR-01, NOR-03 & Identidad de sesión y permisos por operación. Pruebas de autenticación, representación válida y denegación sin revelar recursos ajenos. & I \\
+02 & NOR-02, NOR-09 & Herramientas tipadas y consultas al simulador. Pruebas de búsqueda y acceso a la agenda, sin generar disponibilidad desde el modelo. & I \\
+03 & NOR-07 & Propuesta vinculada a confirmación y operación concreta. Pruebas de rechazo sin confirmación y de reserva confirmada. & I \\
+04 & NOR-07, NOR-09 & Revalidación de disponibilidad antes de escribir. Pruebas de conflicto entre conversaciones e idempotencia, con garantías limitadas al proceso local. & I \\
+05 & NOR-04, NOR-09 & Validación de servicio, fecha, hora y modalidad antes de ofrecer alternativas. Pruebas de restricciones y corrección de propuestas sin sustitución silenciosa. & I \\
+06 & NOR-08, NOR-09 & Reprogramación que comprueba el destino antes de liberar la cita anterior. Pruebas de conservación del estado ante fallos y conflictos. & I \\
+07 & NOR-02, NOR-04 & Recuperación selectiva del perfil y aplicación de preferencias a opciones compatibles. Pruebas de conflictos, vigencia y cambios autorizados. & I \\
+08 & NOR-09 & Resultado procedente de la operación ejecutada y de su recibo. Pruebas de concordancia entre respuesta, cita y estado del simulador. & I \\
+09 & NOR-05, NOR-06, NOR-08 & Compuertas de alcance y reglas de cumplimiento. Pruebas adversariales de bloqueo. El sistema orienta, pero no transfiere el caso a personal sanitario. & P \\
+10 & NOR-11 & Datos de prueba sintéticos, modo de datos configurado y comprobaciones de incompatibilidad. El requisito depende del uso previsto del laboratorio. & L \\
+11 & NOR-10 & \texttt{AuditEvent} mínimo e historial separado en el portal. Pruebas de permisos y retención. No garantiza borrado forense ni control de copias externas. & P \\
+12 & NOR-12 & Revisión de finalidad y clasificación ante cambios del sistema. Procedimiento institucional pendiente. No existe una prueba técnica que lo sustituya. & O \\
+\bottomrule
+\end{longtable}
+\normalsize
+\setlength{\tabcolsep}{6pt}
+\end{landscape}
+
+Las comprobaciones de la tabla se apoyan en la suite automática de la versión actual, que se ejecuta sin llamadas a los modelos. Incluye 24 casos adversariales que llaman a la capa de herramientas compartida por M5, S1 y H con argumentos maliciosos o fuera de orden: citas de otros pacientes, identificadores inventados, confirmaciones sin propuesta, en el mismo turno o con una propuesta caducada o distinta, textos no afirmativos y lecturas del perfil sin finalidad o tras la renuncia. Ninguna salida de un modelo puede ampliar esos límites, porque se aplican fuera de él. Otras 11 pruebas verifican requisitos concretos: representación con y sin permiso, competencia por un mismo hueco, conservación de la modalidad, traza mínima, rechazo de modos de datos no sintéticos y retención del portal. Las 35 pruebas se superan en la versión evaluada. La detención de consultas clínicas, emergencias y gestiones de otras personas se comprueba aparte, en las pruebas del dominio y de las tres arquitecturas.
+
+Los requisitos \texttt{NOR-13} a \texttt{NOR-16} no aparecen como controles implementados en la Tabla~\ref{tab:trazabilidad-memoria} porque corresponden a obligaciones adicionales de una implantación real. Su revisión quedaría incluida en el procedimiento organizativo previsto por \texttt{REQ-CITA-12}. La trazabilidad técnica de CitaLab se limita a las capacidades y pruebas documentadas, sin atribuir a los resultados una validez jurídica o clínica que no se ha evaluado.
+
+\section{Finalidades de los registros}
+
+CitaLab conserva una traza mínima para identificar la operación realizada, la regla aplicada, su resultado y las marcas temporales. Este registro no incluye la conversación completa ni los datos internos de razonamiento de los modelos.
+
+El portal mantiene por separado el historial de conversaciones sintéticas y los metadatos necesarios para revisar y reproducir las pruebas. El plazo general de conservación es de 30 días por defecto y puede configurarse entre 1 y 90 días. Las copias diagnósticas de entradas y salidas estructuradas requieren activación expresa y tienen un plazo predeterminado de 7 días, que no puede superar el establecido para el historial.
+
+Las cuentas, la agenda actual y determinadas revisiones de configuración se conservan según las necesidades del laboratorio, con reglas distintas de las aplicadas al historial. La limpieza de SQLite no garantiza el borrado forense ni abarca automáticamente copias de seguridad o exportaciones externas. Los plazos y procedimientos correspondientes a datos sanitarios reales tendrían que establecerse en una implantación institucional.

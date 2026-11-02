@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "citalab"
+version = "3.0.0"
+description = "IA agéntica para la gestión personalizada de citas sanitarias en entornos regulados (TFM)"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Andrés Rubio Ramos" }]
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.116,<0.141",
+    "httpx>=0.28,<1.0",
+    "langgraph>=1.2,<2.0",
+    "python-dotenv>=1.2,<2.0",
+    "pydantic>=2.11,<3.0",
+    "tzdata>=2025.2; platform_system == 'Windows'",
+    "uvicorn>=0.35,<1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=9.1,<10.0", "ruff>=0.16,<0.17"]
+
+[project.urls]
+Repository = "https://github.com/Andros5/citalab"
+
+[project.scripts]
+citalab-portal = "citalab.portal.app:main"
+citalab-campaign = "citalab.evaluation.runner:main"
+citalab-analysis = "citalab.evaluation.analysis:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]
+
+[tool.ruff]
+line-length = 120

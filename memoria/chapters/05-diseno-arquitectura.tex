@@ -1,0 +1,402 @@
+\chapter{Diseño de la arquitectura}
+\label{chap:diseno}
+
+\section{Criterios de diseño}
+
+CitaLab separa la interpretación de una solicitud de su ejecución. El modelo
+identifica lo que pide la persona y prepara la respuesta. El programa comprueba
+los permisos, consulta la agenda y realiza las operaciones. Entender una petición
+no concede autorización para ejecutarla.
+
+Los requisitos del capítulo~\ref{chap:dominio-regulado} se aplican a las tres
+arquitecturas. El acceso al perfil depende de la finalidad de la gestión. Las
+operaciones con efectos necesitan una propuesta mostrada y una confirmación
+expresa. El asistente trabaja con datos sintéticos y no realiza valoraciones
+clínicas. Estas condiciones se mantienen al comparar M5, S1 y H.
+
+Una interpretación incompleta puede resolverse preguntando por el dato que falta.
+Si el modelo redacta una respuesta que pierde un dato importante, por ejemplo la
+hora de la cita propuesta, CitaLab no muestra esa redacción. En su lugar muestra
+un texto fijo que el programa compone con los datos leídos directamente de la
+agenda, como \enquote{Propuesta de reserva: Pediatría, martes 3 de noviembre de
+2026 a las 11:00 (presencial, Centro de Salud Demo). Todavía no se ha aplicado
+ningún cambio. \textquestiondown{}Lo confirmas?}.
+En cambio, una petición sin permisos o sin confirmación no puede producir una
+escritura. La Tabla~\ref{tab:req-mecanismos} relaciona estas
+decisiones con los requisitos del dominio. El Apéndice~\ref{app:requisitos-normativos}
+recoge su trazabilidad normativa.
+
+\begin{table}[!htbp]
+\centering
+\caption{Requisitos del dominio y mecanismo de la arquitectura que los satisface.}
+\label{tab:req-mecanismos}
+\small
+\begin{tabularx}{\textwidth}{L{0.15\textwidth}Y}
+\toprule
+\textbf{Requisito} & \textbf{Mecanismo} \\
+\midrule
+REQ-CITA-01 & Identidad, paciente y representación tomados de la sesión. Regla \texttt{CMP-REPRESENT-01} en las consultas, en las propuestas sobre citas existentes y al confirmar. \\
+REQ-CITA-02 & Servicios, huecos y citas solo a través de la capa de herramientas. \\
+REQ-CITA-03 & Propuesta pública previa y confirmación explícita (\texttt{CMP-CONFIRM-01}). \\
+REQ-CITA-04 & Revalidación de versión y disponibilidad bajo bloqueo. Idempotencia. \\
+REQ-CITA-05 & Búsqueda restringida al servicio, fecha, hora, franja y modalidad pedidos. Sin sustitución silenciosa. \\
+REQ-CITA-06 & Reprogramación atómica que comprueba el destino antes de liberar el origen. \\
+REQ-CITA-07 & Vistas del perfil por finalidad. Las preferencias solo ordenan o adaptan la forma. \\
+REQ-CITA-08 & Hechos de propuestas y recibos generados desde la agenda. Comprobación de la redacción. \\
+REQ-CITA-09 & Avisos clínicos, rechazo fuera de alcance y parada ante emergencia (112). \\
+REQ-CITA-10 & Modo de datos sintético obligatorio (\texttt{CMP-MODE-01}). \\
+REQ-CITA-11 & Traza mínima \texttt{AuditEvent} separada del historial. Diagnóstico solo con activación expresa. \\
+REQ-CITA-12 & Fuera del prototipo: procedimiento organizativo. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Las herramientas comprueban el acceso y las condiciones de escritura. Las
+respuestas se revisan antes de mostrarlas para detectar pérdidas de información
+o anuncios de efectos que no se han producido. Estas comprobaciones reducen
+errores concretos, pero no bastan para valorar toda la conversación. Los fallos
+de proveedor se registran aparte.
+
+\section{Planos y fronteras de autoridad}
+
+La arquitectura separa tres planos (Figura~\ref{fig:diseno-arquitectura}). El
+plano conversacional interpreta y redacta. El plano de control concentra las
+políticas, la confirmación y la ejecución. El plano de datos conserva la agenda
+FHIR y los perfiles sintéticos. CitaLab, el portal web, da acceso a la
+conversación y a la inspección de cada decisión.
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=7mm,
+  role/.style={draw=ETSBlue,rounded corners,align=center,minimum height=9mm,
+    text width=112mm,fill=ETSLightBlue!14,font=\small},
+  control/.style={role,draw=ETSGold!75!black,fill=ETSGold!15},
+  data/.style={role,draw=USRed,fill=USRed!7,text width=53mm},
+  exchange/.style={{Latex[length=2mm]}-{Latex[length=2mm]},thick,draw=ETSBlue}
+]
+\node[role] (agents) {Plano conversacional: M5 (cinco agentes), S1 (agente único) y H (flujo programado)};
+\node[control,below=of agents] (core) {Plano de control: capa de herramientas, motor de políticas,\\propuestas, confirmación, revalidación e idempotencia};
+\node[data,below=12mm of core,xshift=-30mm] (portal) {Portal CitaLab\\conversación, inspección y evaluación};
+\node[data,right=6mm of portal] (his) {Simulador HIS/FHIR\\agenda y perfiles sintéticos};
+\draw[exchange] (agents) -- node[right,font=\scriptsize]{acciones tipadas / observaciones} (core);
+\draw[exchange] (portal) -- (core);
+\draw[exchange] (core) -- (his);
+\end{tikzpicture}
+\caption{Planos de la arquitectura. Los agentes solo actúan a través de la capa de herramientas.}
+\label{fig:diseno-arquitectura}
+\end{figure}
+
+La frontera principal es la \textbf{capa de herramientas}: el único punto por
+el que los modelos pueden pedir datos o cambios. Ofrece nueve operaciones
+(Tabla~\ref{tab:herramientas}). Las que consultan citas, huecos o el perfil y
+las que proponen cambios sobre una cita existente invocan el motor de
+políticas, y \texttt{confirm} lo vuelve a invocar antes de escribir. El
+programa también lee datos fuera de esas operaciones para preparar el contexto
+de los agentes: un resumen de las citas del paciente de la sesión y el estilo
+de respuesta guardado en su perfil, salvo que la persona haya renunciado a
+usarlo. Esas lecturas se limitan al paciente que fija la sesión. Ningún modelo
+recibe acceso a la base de datos, a consultas arbitrarias ni a código
+ejecutable.
+
+\begin{table}[!htbp]
+\centering
+\caption{Capa de herramientas compartida por M5, S1 y H.}
+\label{tab:herramientas}
+\small
+\begin{tabularx}{\textwidth}{L{0.27\textwidth}Y}
+\toprule
+\textbf{Herramienta} & \textbf{Efecto y control} \\
+\midrule
+\texttt{list\_appointments} & Lista las citas propias de la persona autenticada, con filtros opcionales. Nunca devuelve citas ajenas. \\
+\texttt{find\_slots} & Busca huecos libres de un servicio y los ordena (hora exacta, franja preferida autorizada, cronología). No reserva. \\
+\texttt{get\_preferences} & Devuelve la vista del perfil para una finalidad (ordenar huecos, adaptar respuestas o canal de recordatorio). Se deniega si la persona renunció al perfil. \\
+\texttt{propose\_booking}, \texttt{propose\_reschedule}, \texttt{propose\_cancel}, \texttt{propose\_reminder} & Crean una propuesta pública con todos sus datos, sin escribir nada. Una cita ajena se deniega sin revelar su contenido. \\
+\texttt{confirm} & Única ruta de escritura: ejecuta la propuesta vigente si la persona la acepta con el botón Confirmar o con un mensaje afirmativo después de haberla visto. \\
+\texttt{discard} & Descarta la propuesta pendiente. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Confirmación y escritura}
+\label{sec:diseno-confirmacion}
+
+Se distinguen tres actos que suelen confundirse. La \emph{autenticación}
+identifica la sesión. La \emph{autorización} decide si esa sesión puede leer o
+escribir sobre un paciente. La \emph{confirmación} expresa que la persona acepta
+una propuesta concreta. Toda gestión con efectos sigue dos tiempos: primero se
+presenta una propuesta con servicio, fecha, hora, modalidad y centro, y después
+la persona la confirma.
+
+La confirmación se acepta por dos vías: el botón de la tarjeta de propuesta o
+un mensaje afirmativo. En el segundo caso, la arquitectura debe interpretar el
+mensaje como aceptación, y el código exige además que la propuesta se haya
+mostrado en un turno anterior, que siga vigente y que el mensaje contenga una
+expresión afirmativa sin ser una pregunta ni un condicional
+(\enquote{\textquestiondown{}qué pasaría si confirmo?} nunca confirma). Si alguna
+condición falla, el asistente vuelve a pedir la confirmación. Esta comprobación
+del texto es léxica y sencilla. Rechaza los mensajes que empiezan por una
+negación, como \enquote{espera, todavía no}, pero no una negación posterior,
+como la de \enquote{de acuerdo, pero no lo confirmes}. Ante un mensaje así, la
+protección depende de que la arquitectura no lo interprete como una aceptación.
+El botón no tiene este límite, y en la campaña todas las escrituras se
+confirmaron con él (apartado~\ref{sec:resultados-seguridad}).
+
+Al ejecutar una reserva, un cambio o una cancelación, el simulador revalida la
+versión del hueco y de la cita bajo un mismo bloqueo y aplica la operación de
+forma atómica. En un recordatorio solo comprueba que la cita siga activa y sea
+de la persona, así que el aviso se calcula sobre la hora que tenga la cita al
+confirmar. Una clave de idempotencia
+ligada a la propuesta impide duplicar efectos si la petición se repite. Si otra
+persona ocupó el hueco entre la propuesta y la confirmación, la operación se
+rechaza, la cita original se conserva y el asistente lo comunica sin reservar
+otra alternativa por iniciativa propia.
+
+\section{Identidad y representación}
+
+La sesión fija tres datos que ningún mensaje puede cambiar: quién actúa, sobre
+qué paciente y en nombre de quién. Una persona puede gestionar sus propias citas
+y, si consta una relación de representación sintética, las del paciente
+representado. Afirmar en la conversación que se actúa por otra persona no
+concede ningún permiso: la capa de herramientas deniega el acceso con la regla
+\texttt{CMP-REPRESENT-01} sin revelar el contenido del recurso ajeno.
+
+\section{Perfil, memoria y personalización}
+
+CitaLab no envía al modelo el historial completo para personalizar. Conserva
+por separado el \emph{perfil} (preferencias entre conversaciones) y el
+\emph{estado de la gestión} (lo que la persona pide ahora, las opciones
+mostradas y la propuesta pendiente).
+
+Cada atributo del perfil incluye valor, origen (declarado, importado o
+inferido), confianza, vigencia, finalidad y procedencia. La resolución es
+determinista: descarta lo retirado, caducado, no autorizado para la finalidad o
+con confianza inferior a 0,5, y prioriza declarado sobre importado y este sobre
+inferido. El valor 0,5 se fijó como un punto de corte sencillo: por debajo de él
+una preferencia se considera demasiado incierta para usarla. Es una decisión de
+diseño de este prototipo, no el resultado de un estudio, y puede cambiarse
+modificando un único parámetro sin afectar al resto del sistema.
+
+Si después de esos filtros quedan dos valores distintos con el mismo origen,
+confianza y fecha (por ejemplo, mañana y tarde declaradas el mismo día), el
+sistema no elige uno al azar. Ese atributo no se aplica: los huecos se muestran
+por orden de fecha, como si no hubiera preferencia guardada, y la persona elige
+o indica la franja que quiere. Los agentes reciben ese conflicto señalado en la
+vista de preferencias.
+
+Las preferencias se aplican con una precedencia explícita: \emph{petición actual
+$>$ ajuste de la conversación $>$ perfil}. Una franja pedida en el mensaje
+sustituye a la guardada. En M5 y H, pedir \enquote{no uses mis preferencias}
+activa una marca que impide leer el perfil durante esa conversación. S1 no
+tiene agente de contexto que la active, así que depende de que el modelo deje
+de consultarlo. El control equivalente del portal activa la marca en las tres
+arquitecturas. La Tabla~\ref{tab:preferencias-alcance}
+resume para qué sirve cada preferencia y qué efecto puede tener.
+
+Los ajustes que la persona hace durante una conversación no se escriben en su
+perfil. Para conservarlos en futuras conversaciones, la persona abre el panel de
+preferencias de la conversación en CitaLab y elige guardarlos en el perfil.
+CitaLab le muestra entonces una propuesta con los valores nuevos, y solo cuando
+pulsa Confirmar se guarda una nueva versión del perfil con esas preferencias
+como declaradas. Si la rechaza, el perfil no cambia.
+
+\begin{table}[!htbp]
+\centering
+\caption{Preferencias, finalidad y efecto.}
+\label{tab:preferencias-alcance}
+\small
+\begin{tabularx}{\textwidth}{L{0.22\textwidth}L{0.22\textwidth}Y}
+\toprule
+\textbf{Atributo} & \textbf{Finalidad} & \textbf{Efecto} \\
+\midrule
+Franja horaria & Ordenar huecos & Ordena candidatos compatibles. Nunca elimina una restricción expresa ni crea disponibilidad. \\
+Modalidad y centro & Ordenar huecos & No se aplican en esta versión, porque las agendas solo ofrecen citas presenciales en un centro. Una modalidad pedida que no existe no se sustituye por otra. \\
+Idioma, detalle y tratamiento & Adaptar la respuesta & Cambian la forma, no los hechos ni la necesidad de confirmar. \\
+Canal de recordatorio & Recordatorios & Canal por defecto de un recordatorio simulado si la persona no indica otro. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Traza mínima e historial de investigación}
+
+Cada consulta de citas, escritura, conflicto o denegación genera un registro
+\texttt{AuditEvent} de FHIR con el actor, el paciente, la operación, la regla
+aplicada, el resultado y la marca temporal. No incluye mensajes ni contenido de
+la conversación y se conserva aparte del historial. Las búsquedas de huecos y
+las lecturas del perfil quedan en las trazas de la conversación, no en esta
+traza mínima. El historial de
+investigación de CitaLab guarda las conversaciones sintéticas y las métricas de
+cada llamada al modelo. Las entradas y salidas completas solo se conservan si
+se activa expresamente el diagnóstico, con un plazo propio (7 días por defecto)
+que no puede superar el del historial (30 días por defecto). En ningún caso se
+guardan razonamientos internos del modelo.
+
+\section{Respuestas: hechos del código, redacción del modelo}
+
+Cada respuesta se construye a partir de un \emph{plan}: el tipo de mensaje
+(opciones, propuesta, recibo, conflicto, listado, aclaración, información,
+rechazo o escalado), los hechos que debe comunicar, que el código formatea a
+partir de la agenda, los avisos obligatorios y, si procede, una pregunta. El modelo redacta ese plan con el idioma, el nivel de detalle y el
+tratamiento aplicables.
+
+Antes de mostrar la redacción se hacen cuatro comprobaciones deliberadamente
+simples: que contenga las horas del plan, que no añada horas ajenas a la
+petición, al plan o a la agenda de la persona, que mantenga la pregunta si la
+hay y que no anuncie una reserva, cancelación o cambio cuando el plan no es un
+recibo.
+Si alguna falla, se muestra el texto determinista del plan. Los avisos
+normativos (valoración clínica, emergencia, datos de terceros) se insertan por
+código y no dependen de la redacción. El
+apartado~\ref{sec:resultados-respaldos} analiza cuántas veces actuaron estas
+comprobaciones en la campaña y con qué acierto.
+
+\section{Las tres arquitecturas}
+
+Las tres variantes comparten el núcleo descrito y difieren en cómo producen las
+decisiones semánticas. Con la terminología del capítulo~\ref{chap:fundamentos},
+H es un \emph{workflow}: el programa fija la ruta. M5 y S1 dejan al modelo
+elegir el siguiente paso entre acciones acotadas mediante un ciclo de acción y
+observación, sin generar ni conservar razonamientos intermedios. La
+Tabla~\ref{tab:agentes-logicos} indica qué agentes lógicos tiene cada variante
+y cómo se ejecutan, y la Tabla~\ref{tab:comparadores-mecanismos} compara quién
+toma cada tipo de decisión.
+
+\begin{table}[!htbp]
+\centering
+\caption{Agentes lógicos y llamadas por arquitectura.}
+\label{tab:agentes-logicos}
+\small
+\begin{tabularx}{\textwidth}{L{0.10\textwidth}L{0.33\textwidth}Y}
+\toprule
+\textbf{Variante} & \textbf{Agentes lógicos (rol, instrucciones y contrato)} & \textbf{Nodos y procesos} \\
+\midrule
+M5 & Contexto, cumplimiento, perfiles, orquestación y personalización & Seis nodos LangGraph en un único proceso. El mismo modelo para los cinco roles \\
+S1 & Agente único con nueve herramientas & Un bucle de llamadas a funciones en el mismo proceso \\
+H & Interpretación y redacción (tareas LLM acotadas) & Secuencia programada en código \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption{Mecanismos de M5, S1 y H bajo controles comunes.}
+\label{tab:comparadores-mecanismos}
+\small
+\begin{tabularx}{\textwidth}{L{0.17\textwidth}YYY}
+\toprule
+\textbf{Aspecto} & \textbf{M5} & \textbf{S1} & \textbf{H} \\
+\midrule
+Interpretación & Agente de contexto & El propio agente & Agente de contexto (tarea LLM) \\
+Riesgos normativos & Agente de cumplimiento y reglas & Instrucciones y reglas & Solo reglas \\
+Preferencias & Agente de perfiles decide cuáles aplicar & Herramienta \texttt{get\_preferences} & Reglas de precedencia \\
+Siguiente paso & Orquestador LLM entre acciones habilitadas & Bucle de llamadas a herramientas & Secuencia programada \\
+Redacción & Agente de personalización & El propio agente & Tarea LLM de redacción \\
+\midrule
+Controles y efectos & \multicolumn{3}{p{0.68\textwidth}}{Mismas herramientas, políticas, vistas autorizadas, confirmación, revalidación y escritura.} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{M5: cinco agentes especializados}
+
+M5 es la arquitectura principal. Sus cinco responsabilidades se coordinan con
+un grafo de LangGraph \citep{langgraphGraphApi}, representado en la
+Figura~\ref{fig:grafo-m5}:
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=6mm and 8mm,
+  box/.style={draw=ETSBlue,rounded corners,text width=29mm,align=center,
+    minimum height=9mm,font=\small,fill=ETSLightBlue!12},
+  tool/.style={box,draw=ETSGold!75!black,fill=ETSGold!15},
+  flow/.style={-{Latex[length=2mm]},draw=ETSBlue,thick}
+]
+\node[box] (ctx) {Contexto};
+\node[box,right=of ctx] (cmp) {Cumplimiento};
+\node[box,right=of cmp] (prf) {Perfiles};
+\node[box,below=of prf] (dec) {Orquestación\\(decidir)};
+\node[tool,left=of dec] (act) {Actuar\\(herramientas)};
+\node[box,below=of dec] (per) {Personalización};
+\draw[flow] (ctx) -- (cmp);
+\draw[flow] (cmp) -- (prf);
+\draw[flow] (prf) -- (dec);
+\draw[flow] (dec) to[bend right=15] (act);
+\draw[flow] (act) to[bend right=15] (dec);
+\draw[flow] (dec) -- (per);
+\end{tikzpicture}
+\caption{Grafo de M5. Una emergencia o un rechazo terminan antes. El bucle de orquestación está acotado.}
+\label{fig:grafo-m5}
+\end{figure}
+
+\begin{description}
+  \item[Contexto.] Interpreta el último mensaje con la conversación reciente y el
+  estado: intención, servicio, fechas, cita o hueco referidos, directivas de
+  idioma o detalle, renuncia al perfil y señales clínicas o de urgencia.
+  \item[Cumplimiento.] Recomienda continuar, rechazar o escalar y si procede un
+  aviso clínico. Su recomendación solo puede restringir: los permisos los
+  decide el motor de políticas.
+  \item[Perfiles.] Recibe únicamente la vista autorizada para la finalidad y
+  decide qué preferencias aplicar a esta petición.
+  \item[Orquestación.] Elige la siguiente acción entre las habilitadas por el
+  programa para el estado actual. El ciclo de decidir y actuar se repite como
+  máximo cuatro veces por turno. Es un límite de seguridad: la gestión más larga
+  necesita tres pasos (consultar las citas, buscar huecos y crear la propuesta),
+  y el cuarto deja margen. Si se alcanza, el coordinador no sigue llamando a
+  herramientas y se responde con lo obtenido hasta ese momento, por ejemplo las
+  opciones encontradas, para que la persona continúe en el turno siguiente.
+  \item[Personalización.] Redacta el plan de respuesta con el estilo aplicable.
+\end{description}
+
+Que haya cinco responsabilidades no implica cinco llamadas por mensaje: el
+agente de perfiles solo interviene en reservas, reprogramaciones y
+recordatorios, y los mensajes triviales (descartar, rechazar) se redactan sin
+modelo.
+
+\subsection{S1: agente único}
+
+S1 integra todas las responsabilidades en un único agente que usa las mismas
+herramientas mediante llamadas nativas a funciones. Sus instrucciones recogen
+las reglas de confirmación, privacidad, alcance clínico y preferencias. Si su
+texto final anuncia un efecto que no ocurrió o pierde una hora relevante, se
+sustituye por el texto determinista del último resultado de herramienta.
+
+\subsection{H: flujo programado con tareas LLM}
+
+H fija en código la secuencia de cada gestión: identificar la cita, buscar
+huecos, proponer y confirmar. El modelo solo interpreta el mensaje (mismo
+agente de contexto que M5) y redacta la respuesta. Sirve de referencia: una
+diferencia entre M5 y H no puede atribuirse únicamente al número de agentes,
+porque también cambia cuánto del flujo decide el código.
+
+\section{Tratamiento de errores}
+
+\label{sec:lecciones-v1}
+
+En una primera versión del prototipo, los errores de interpretación y los
+incumplimientos de seguridad recibían un tratamiento demasiado parecido. Esto
+podía terminar una gestión aunque fuera posible aclarar la petición. De esa
+experiencia se mantiene una decisión de diseño: comprobar de forma estricta
+los permisos y los efectos, y permitir que la conversación resuelva la
+información incompleta mediante preguntas o respuestas de respaldo.
+
+\section{Alternativas consideradas}
+
+\paragraph{Grafo explícito frente a bucle propio.} LangGraph representa nodos,
+estado y transiciones condicionales con una interfaz común y facilita trazar
+qué fase produjo cada decisión. S1 utiliza un bucle de llamadas a herramientas y H sigue una secuencia
+programada. Estas dos variantes no necesitan el grafo de M5.
+
+\paragraph{Contratos estructurados frente a texto libre.} Las salidas de los
+agentes son objetos JSON validados con Pydantic y enumeraciones cerradas, lo
+que impide acciones desconocidas. Los campos no exigen copiar texto del usuario. Los valores dudosos se tratan
+como ausentes para que el asistente pueda pedir una aclaración.
+
+\paragraph{Controles comunes frente a controles por variante.} Compartir
+herramientas y políticas evita que una variante obtenga permisos distintos y
+convierte la seguridad en una propiedad del núcleo, no del modelo. A cambio, la
+comparación no mide la aportación aislada de cada barrera determinista.
+
+\paragraph{Persistencia local.} SQLite y una agenda en memoria protegida por
+bloqueo permiten reproducir el entorno sin un HIS externo. Las garantías de
+concurrencia se limitan a un proceso.

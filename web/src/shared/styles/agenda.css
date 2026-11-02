@@ -1,0 +1,193 @@
+.calendar-layout {
+  display: grid;
+  grid-template-columns: 310px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.calendar {
+  padding: 22px;
+}
+.calendar header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.calendar h2 {
+  font-size: 15px;
+  text-transform: capitalize;
+  margin: 0;
+}
+.calendar header button {
+  border: 0;
+}
+.weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.weekdays {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 9px;
+}
+.calendar-grid button {
+  min-height: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  position: relative;
+  background: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.calendar-grid button:disabled {
+  opacity: 1;
+  color: var(--muted);
+}
+.calendar-grid button.has-slots {
+  background: var(--surface-3);
+  color: var(--brand);
+}
+.calendar-grid button.selected {
+  color: var(--on-brand);
+  background: var(--brand);
+}
+.calendar-grid button > span {
+  position: absolute;
+  bottom: 4px;
+  height: 3px;
+  width: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.calendar-legend {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  margin: 20px 0 5px;
+}
+.calendar-legend i {
+  height: 6px;
+  width: 6px;
+  background: var(--brand);
+  border-radius: 50%;
+}
+.calendar .text-button {
+  font-size: 0.8125rem;
+}
+.calendar-summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--wash);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+  margin-top: 22px;
+  color: var(--brand);
+}
+.calendar-summary strong {
+  font-size: 0.8125rem;
+  display: block;
+}
+.calendar-summary small {
+  font-size: 0.8125rem;
+  display: block;
+  margin-top: 4px;
+}
+.slot-panel .section-heading h2 {
+  font-size: 18px;
+}
+.slot-list {
+  /* La página es el único contenedor desplazable. Un scroll anidado hacía que
+     la lista quedara atrapada en ventanas de altura o anchura reducidas. */
+  max-height: none;
+  overflow: visible;
+}
+.slot-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-top: 1px solid var(--border);
+  padding: 18px 0;
+}
+.slot-row > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.slot-row strong {
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.slot-row small {
+  font-size: 0.8125rem;
+  display: block;
+}
+.slot-row .slot-time {
+  width: 80px;
+  flex-shrink: 0;
+}
+.slot-time strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 450;
+}
+.slot-time span {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+.slot-row button {
+  font-size: 0.8125rem;
+  min-height: 33px;
+}
+.appointments {
+  margin-top: 0;
+}
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(290px, 0.8fr) minmax(0, 1.2fr);
+  gap: 24px;
+}
+.profile-layout form {
+  margin-top: 23px;
+}
+.profile-layout form > p {
+  font-size: 0.8125rem;
+  margin-top: 17px;
+}
+.fhir-layout {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 25px;
+}
+.resource-list {
+  max-height: 580px;
+  overflow-y: auto;
+}
+.resource-list button {
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+  border: 0;
+  border-radius: 3px;
+  font-size: 0.8125rem;
+  padding: 12px 10px;
+  min-height: 42px;
+}
+.resource-list button svg:last-child {
+  margin-left: auto;
+}
+.resource-list button.selected {
+  background: var(--wash);
+  color: var(--brand);
+}
+.fhir-layout > .json {
+  margin: 0;
+  max-height: 580px;
+}

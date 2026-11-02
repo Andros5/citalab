@@ -1,0 +1,137 @@
+\chapter{Dominio sanitario y requisitos del entorno regulado}
+\label{chap:dominio-regulado}
+
+\section{Gestión administrativa de citas}
+
+Una cita sanitaria relaciona a una persona, un servicio y un horario dentro de una agenda. Su gestión comprende varias operaciones con requisitos distintos. Para solicitar una cita, hay que consultar los huecos disponibles. Consultar o cancelar una cita requiere identificar la reserva existente. Para cambiarla, hay que encontrar una alternativa compatible. Además, la disponibilidad puede variar mientras se realiza la gestión, por lo que es necesario consultar el estado de la agenda y comprobar el resultado de las operaciones.
+
+En el Servicio Andaluz de Salud (SAS), las citas de atención primaria pueden solicitarse mediante canales digitales, telefónicos y presenciales. A través de ClicSalud+ también se pueden consultar, modificar o cancelar determinadas citas, aunque las opciones disponibles dependen del tipo de cita y del medio de identificación \citep{sasCitaPrimaria,sasGestionCitas}. CitaLab toma estas gestiones como referencia funcional, pero no reproduce la plataforma del SAS ni se conecta con sus sistemas.
+
+El prototipo se centra en la gestión administrativa de citas de medicina de familia, pediatría y enfermería, mediante agendas sintéticas que solo ofrecen citas presenciales. Permite consultar disponibilidad y citas propias, reservar, reprogramar, cancelar y configurar recordatorios simulados. No determina qué atención necesita una persona ni asigna prioridades clínicas. Cuando una solicitud requiere valoración sanitaria o queda fuera de las funciones disponibles, el asistente detiene la gestión y orienta sobre cómo continuar fuera del sistema.
+
+\section{Actores, identidad y responsabilidades}
+
+En la gestión de citas es importante distinguir entre el paciente y la persona que realiza la solicitud. Ambos pueden ser la misma persona, pero también es posible que alguien actúe en representación de otra. En ese caso, estar identificado en el sistema no implica tener permiso para consultar o modificar las citas de cualquier paciente. Cada operación debe comprobarse según la identidad del solicitante, el paciente afectado y los permisos correspondientes.
+
+La Tabla~\ref{tab:actores-dominio} recoge los principales actores del proceso y su participación en CitaLab.
+
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{L{0.18\linewidth}L{0.30\linewidth}L{0.43\linewidth}}
+\caption{Actores del proceso y su participación en CitaLab.}\label{tab:actores-dominio}\\
+\toprule
+\textbf{Actor} & \textbf{Responsabilidad} & \textbf{Participación en CitaLab} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Actor} & \textbf{Responsabilidad} & \textbf{Participación en CitaLab} \\
+\midrule
+\endhead
+Paciente & Consultar y gestionar sus citas. & Representado mediante una identidad, citas y preferencias sintéticas. \\
+Representante autorizado & Realizar gestiones en nombre de un paciente dentro de los permisos concedidos. & La relación de representación y los permisos se simulan y comprueban para cada operación. \\
+Centro sanitario & Organizar los servicios y sus agendas. & Representado mediante centros, servicios y disponibilidad sintéticos. \\
+Profesional sanitario & Prestar la atención correspondiente a las citas. & Puede figurar en los datos de la agenda, pero no participa en las conversaciones. \\
+Personal administrativo & Atender gestiones que requieren intervención fuera del asistente. & No recibe solicitudes ni conversaciones desde el prototipo. \\
+Equipo técnico y de investigación & Configurar el sistema, administrar las pruebas y revisar los resultados. & Utiliza las funciones del portal según los permisos de cada rol. \\
+\bottomrule
+\end{longtable}
+\normalsize
+\setlength{\tabcolsep}{6pt}
+
+CitaLab utiliza cuentas y relaciones de representación sintéticas, por lo que no verifica identidades ni autorizaciones del mundo real. El sistema obtiene la identidad y los permisos de la sesión y de los datos configurados, no de lo que una persona afirme durante la conversación. Estas comprobaciones se realizan en el backend antes de permitir el acceso a información o ejecutar una operación.
+
+\section{Modelo de agenda e interoperabilidad}
+
+FHIR R4 permite representar la gestión de citas mediante varios recursos relacionados. \texttt{Schedule} describe una agenda asociada a un servicio o recurso, \texttt{Slot} representa sus intervalos de tiempo y su disponibilidad, y \texttt{Appointment} recoge los datos de una cita, como su fecha, participantes y estado \citep{fhirAppointment,fhirR4,fhirSlot}. Por su parte, \texttt{Encounter} representa el episodio de atención sanitaria, que es distinto de la reserva administrativa \citep{fhirEncounter}. CitaLab utiliza únicamente los campos y operaciones de FHIR necesarios para las gestiones estudiadas. No implementa un servidor FHIR completo ni está conectado con sistemas sanitarios reales.
+
+La agenda sintética determina qué servicios y horarios pueden ofrecerse. En CitaLab, cada hueco admite una sola reserva, por lo que un horario libre puede dejar de estar disponible mientras la persona decide. Consultar un hueco no garantiza que pueda reservarse posteriormente. Por eso, el sistema vuelve a comprobar su disponibilidad después de recibir la confirmación y antes de registrar la cita. Si el horario ya está ocupado, la reserva no se realiza y el asistente debe informar de lo ocurrido.
+
+Los cambios y cancelaciones también deben mantener la coherencia de la agenda. Si una reprogramación no puede completarse, la cita original se conserva. Del mismo modo, una cancelación debe afectar únicamente a la cita seleccionada y autorizada. El resultado de cada gestión se comprueba en la agenda simulada, sin depender de lo que haya generado el modelo de lenguaje. Los mecanismos utilizados para realizar estas operaciones y evitar duplicados se explican en el capítulo de implementación.
+
+\section{Perfiles y adaptación de la conversación}
+
+En CitaLab, los perfiles sintéticos contienen preferencias que pueden utilizarse durante la gestión de citas. Algunas ayudan a ordenar las alternativas disponibles, como la franja horaria. Otras afectan a la forma de responder, como el idioma, el nivel de detalle o el trato formal. También puede guardarse un canal de comunicación preferido, aunque esta preferencia no activa por sí sola ningún recordatorio.
+
+El sistema no necesita consultar todo el perfil en cada interacción. Según la gestión, utiliza únicamente las preferencias pertinentes, autorizadas y vigentes. Por ejemplo, al consultar una cita ya reservada no hace falta recuperar la franja horaria habitual, mientras que al buscar una nueva cita puede servir para ordenar los huecos compatibles con la solicitud. La persona también puede renunciar al uso de su perfil y continuar la gestión con la información que proporcione durante la conversación.
+
+Para las pruebas se utilizan, además, fichas de personas simuladas que describen distintas formas de interactuar. Estas fichas pueden indicar si alguien conoce el procedimiento, necesita orientación paso a paso o aporta la información progresivamente. Son distintas del perfil de preferencias al que puede acceder el asistente y no representan diagnósticos ni capacidades clínicas. La edad, el idioma o la presencia de un acompañante tampoco permiten suponer necesidades que la persona no ha expresado ni justificar el acceso a información de otros pacientes.
+
+\section{Datos y requisitos de protección}
+
+CitaLab utiliza datos sintéticos de identificación, representación, citas, agendas, preferencias y conversaciones, además de registros de operaciones y evaluación. Estos datos no proceden de pacientes reales ni de sistemas sanitarios. Sin embargo, sus equivalentes en un servicio sanitario podrían contener información personal o revelar aspectos de la salud, como el servicio asociado a una cita. Los datos sintéticos no deben confundirse con los seudonimizados, que siguen siendo personales cuando existe información que permite volver a identificar a la persona \citep{eu2016gdpr}. La Tabla~\ref{tab:datos-sensibilidad} del Apéndice A recoge las categorías de datos y su posible sensibilidad en un sistema sanitario real.
+
+El acceso a los datos depende de la finalidad de cada gestión. Para consultar o modificar una cita, el sistema utiliza la información necesaria del paciente, sus permisos y la agenda correspondiente. Los modelos de lenguaje solo reciben los datos necesarios y autorizados para cada tarea, sin acceder directamente a los registros completos del sistema.
+
+Los registros de operaciones se mantienen separados del historial de investigación. La traza mínima recoge el identificador, la regla aplicada, la operación, el resultado y las marcas temporales, sin incluir la conversación completa. El historial conserva conversaciones sintéticas y metadatos para analizar errores y reproducir las pruebas, con acceso restringido según el rol y un plazo de conservación configurable.
+
+\section{Normas aplicables al alcance diseñado}
+\label{sec:normas-aplicables}
+
+Este apartado examina las normas que afectan a una posible implantación de CitaLab en el Servicio Andaluz de Salud (SAS). El prototipo actual utiliza datos sintéticos y no se conecta a sistemas sanitarios reales, pero se han tenido en cuenta los requisitos que tendría un asistente de citas destinado a la ciudadanía. El análisis parte de una función administrativa, sin triaje, diagnóstico ni decisiones sobre el derecho a recibir asistencia sanitaria. La fecha de corte de la revisión normativa es el 21 de octubre de 2026.
+
+\subsection{Protección de datos y normativa sanitaria}
+
+En un servicio sanitario real, los datos de una cita pueden revelar información sobre la salud. Su tratamiento requiere una base jurídica del artículo 6 del Reglamento General de Protección de Datos (RGPD) y, cuando se traten categorías especiales, una condición del artículo 9. Para la gestión de citas en la sanidad pública podrían resultar aplicables los artículos 6.1.e, relativo a las misiones de interés público, y 9.2.h, que contempla la prestación y gestión de servicios sanitarios. La organización responsable tendría que justificar estas condiciones conforme a la normativa y a cada finalidad concreta \citep{eu2016gdpr}.
+
+El RGPD exige limitar las finalidades, utilizar los datos necesarios y proteger su confidencialidad. También obliga a informar a las personas sobre el tratamiento, incorporar medidas de protección desde el diseño y establecer garantías cuando intervienen proveedores externos. En una implantación real habría que determinar los responsables y encargados, los plazos de conservación, las posibles transferencias internacionales y la necesidad de una evaluación de impacto. Estas obligaciones se recogen, entre otros, en los artículos 5, 13, 14, 25, 28, 32 y 35 del RGPD y se complementan en España mediante la Ley Orgánica 3/2018 \citep{es2018lopd,eu2016gdpr}.
+
+La Ley 41/2002 protege la autonomía del paciente y la confidencialidad de su información sanitaria. Sus artículos 16 y 18 regulan específicamente el acceso a la historia clínica y la representación acreditada para ejercer ese derecho. Aunque CitaLab no consulta historias clínicas, estos principios son relevantes para limitar el acceso a la información y distinguir entre el paciente y quien actúa en su nombre. La Ley 2/1998 de Salud de Andalucía también reconoce derechos relacionados con la información y el acceso a los servicios sanitarios públicos \citep{andalucia1998salud,es2002autonomia}.
+
+Aceptar una propuesta de cita no equivale a autorizar el tratamiento de cualquier dato personal ni al consentimiento informado para una intervención sanitaria. También debe distinguirse una reserva elegida por la persona de las decisiones exclusivamente automatizadas con efectos jurídicos o significativamente similares, reguladas en el artículo 22 del RGPD. CitaLab no decide quién puede recibir una prestación ni establece prioridades asistenciales \citep{eu2016gdpr}.
+
+\subsection{Reglamento de Inteligencia Artificial}
+
+El Reglamento (UE) 2024/1689 establece obligaciones según la finalidad y el riesgo del sistema de IA. Su artículo 2 excluye determinados sistemas destinados exclusivamente a la investigación científica y ciertas actividades de desarrollo y prueba anteriores a su comercialización o puesta en servicio. Esta última exclusión no comprende las pruebas en condiciones reales. El alcance académico y sintético de CitaLab debe tenerse en cuenta al analizar estas disposiciones, pero no permite asumir que un servicio utilizado por pacientes quedaría igualmente excluido \citep{eu2024aiact}.
+
+La clasificación de alto riesgo depende de las funciones del sistema. El anexo III contempla, entre otros supuestos, sistemas utilizados para evaluar el acceso a servicios públicos esenciales, incluida la asistencia sanitaria, y determinadas aplicaciones de triaje y emergencias. CitaLab consulta agendas y realiza operaciones administrativas autorizadas, sin decidir la admisibilidad a una prestación ni asignar prioridad clínica. Por tanto, su finalidad actual no implica por sí sola la clasificación como sistema de alto riesgo. Esta conclusión tendría que revisarse si se añadieran funciones de decisión sobre el acceso, triaje o atención clínica, o si el asistente pasara a formar parte de un producto sanitario sujeto a requisitos específicos \citep{eu2024aiact,eu2026aiactamendment}.
+
+El Reglamento también establece obligaciones para sistemas que no son de alto riesgo. El artículo 50 exige informar de la interacción con una IA, salvo las excepciones previstas, y el artículo 4 obliga a adoptar medidas que favorezcan la alfabetización en IA del personal encargado de utilizar estos sistemas. CitaLab muestra un aviso inicial e incluye documentación sobre sus funciones y límites. No dispone, en cambio, de los procedimientos de formación y supervisión que tendría que organizar un servicio sanitario real \citep{eu2024aiact,eu2026aiactamendment}.
+
+Si una versión futura se clasificara como de alto riesgo, debería cumplir los requisitos correspondientes de gestión de riesgos, documentación, supervisión humana, precisión, robustez y seguridad. El Reglamento (UE) 2026/1744 modificó las fechas de aplicación de parte de estas obligaciones. Las secciones 1, 2 y 3 del capítulo III se aplican desde el 2 de diciembre de 2027 a los sistemas del artículo 6.2 y el anexo III, y desde el 2 de agosto de 2028 a los del artículo 6.1 y el anexo I, con las excepciones previstas. La fecha general de aplicación del Reglamento sigue siendo el 2 de agosto de 2026 \citep{eu2026aiactamendment}.
+
+\subsection{Seguridad, interoperabilidad y accesibilidad}
+
+Una integración con el SAS también estaría sujeta a las normas aplicables a los sistemas de información del sector público. El Real Decreto 311/2022 regula el Esquema Nacional de Seguridad (ENS), que establece medidas de protección según los riesgos del sistema y puede alcanzar a proveedores privados que prestan servicios a una administración. El Real Decreto 4/2010 regula el Esquema Nacional de Interoperabilidad (ENI). CitaLab utiliza estructuras basadas en FHIR R4, pero no implementa una integración con el SAS ni demuestra que cumpla estos esquemas \citep{es2010rd4eni,es2022rd311ens}.
+
+La interfaz de un servicio público también debe cumplir los requisitos de accesibilidad aplicables a sitios web y aplicaciones móviles, establecidos en el Real Decreto 1112/2018. A partir del 2 de enero de 2027 entrará en vigor el Real Decreto 707/2026, que desarrolla las condiciones básicas de accesibilidad cognitiva. La identificación de pacientes y representantes tendría que ajustarse a los procedimientos autorizados por la administración. Si el sistema realizara actuaciones administrativas automatizadas en los términos de la Ley 40/2015, su artículo 41 exigiría determinar los órganos responsables de su definición, supervisión y control \citep{es2018rd1112,es2026rd707accesibilidad,es2015ley40}.
+
+Los controles actuales de CitaLab permiten estudiar estas cuestiones mediante operaciones y datos sintéticos. La implantación en el SAS requeriría completar las decisiones jurídicas y organizativas, las garantías de los proveedores, la integración institucional y las comprobaciones de seguridad y accesibilidad correspondientes.
+
+\section{Requisitos que condicionan el diseño}
+\label{sec:requisitos-diseno}
+
+El análisis del dominio y de la normativa se concreta en doce requisitos comunes a las tres arquitecturas de CitaLab. La Tabla~\ref{tab:req-dominio-regulado} recoge estos requisitos y su situación en el prototipo. Se utiliza \textbf{I} para los implementados con pruebas técnicas documentadas, \textbf{P} para los parcialmente cubiertos, \textbf{L} para los condicionados al entorno de laboratorio y \textbf{O} para los pendientes de un procedimiento organizativo. Estos estados no implican cumplimiento jurídico de un sistema sanitario real.
+
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{L{0.17\linewidth}L{0.69\linewidth}L{0.08\linewidth}}
+\caption{Requisitos del dominio y situación en CitaLab.}\label{tab:req-dominio-regulado}\\
+\toprule
+\textbf{ID} & \textbf{Requisito de diseño} & \textbf{Estado} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{Requisito de diseño} & \textbf{Estado} \\
+\midrule
+\endhead
+REQ-CITA-01 & Distinguir solicitante, paciente y representante, y comprobar los permisos para cada operación. & I \\
+REQ-CITA-02 & Consultar servicios, disponibilidad y reglas mediante herramientas, sin generar esos datos con el modelo. & I \\
+REQ-CITA-03 & Exigir confirmación de una propuesta concreta antes de reservar, modificar o cancelar una cita. & I \\
+REQ-CITA-04 & Comprobar de nuevo la disponibilidad antes de reservar y rechazar propuestas que hayan dejado de ser válidas. & I \\
+REQ-CITA-05 & No sustituir el servicio, la fecha, la hora o la modalidad solicitados sin aceptación de la persona. & I \\
+REQ-CITA-06 & Conservar la cita original cuando una reprogramación no pueda completarse. & I \\
+REQ-CITA-07 & Utilizar preferencias únicamente para adaptar la comunicación u ordenar alternativas compatibles. & I \\
+REQ-CITA-08 & Comunicar el resultado de las operaciones a partir del estado comprobado de la agenda. & I \\
+REQ-CITA-09 & Detener las gestiones clínicas, no autorizadas o fuera del alcance y orientar hacia atención humana. & P \\
+REQ-CITA-10 & Utilizar exclusivamente datos sintéticos durante el desarrollo y las pruebas, también en las llamadas a proveedores externos. & L \\
+REQ-CITA-11 & Mantener una traza mínima de operaciones, separada del historial de investigación y con acceso restringido. & P \\
+REQ-CITA-12 & Revisar la clasificación normativa y los requisitos cuando cambien la finalidad, los usuarios o las funciones del sistema. & O \\
+\bottomrule
+\end{longtable}
+\normalsize
+\setlength{\tabcolsep}{6pt}
+
+Los ocho primeros requisitos cuentan con controles implementados y pruebas documentadas sobre datos sintéticos. En \texttt{REQ-CITA-09}, el asistente puede detener una gestión y orientar al usuario, pero no transfiere el caso a personal sanitario. El requisito \texttt{REQ-CITA-10} depende del uso exclusivo de datos sintéticos. Para \texttt{REQ-CITA-11}, el núcleo mantiene una traza mínima y el portal conserva por separado el historial de investigación, aunque su almacenamiento local no garantiza el borrado forense ni controla las copias externas. Por último, \texttt{REQ-CITA-12} requiere un procedimiento formal de revisión que correspondería a la organización responsable de una implantación real.
+
+\enlargethispage{\baselineskip}%
+El Apéndice A desarrolla los requisitos normativos en la Tabla~\ref{tab:req-normativos} y relaciona los controles con sus pruebas en la Tabla~\ref{tab:trazabilidad-memoria}. Estas pruebas se ejecutan sobre la versión evaluada y justifican el estado técnico de los requisitos dentro de su alcance, pero no equivalen a una validación en un entorno real. Esta separación permite comparar M5, S1 y H con las mismas restricciones, sin considerar implementadas las obligaciones jurídicas y organizativas que quedan fuera del prototipo.

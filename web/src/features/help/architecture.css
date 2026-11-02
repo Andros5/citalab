@@ -1,0 +1,114 @@
+.architecture-guide {
+  scroll-margin-top: 2rem;
+  min-width: 0;
+}
+.architecture-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.architecture-heading > svg {
+  flex-shrink: 0;
+  color: var(--accent, #176e73);
+  margin-top: 0.35rem;
+}
+.architecture-heading h2 {
+  margin-top: 0.35rem;
+}
+.architecture-intro {
+  max-width: 75ch;
+  margin: 1.5rem 0 1rem;
+}
+.architecture-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+.architecture-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  text-decoration: none;
+}
+.architecture-actions a:hover {
+  background: var(--surface-3);
+}
+.architecture-viewer {
+  container-type: inline-size;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface-2);
+}
+.architecture-viewer > p {
+  padding: 0.75rem 1rem;
+  margin: 0;
+}
+.architecture-viewer iframe {
+  display: block;
+  width: 100%;
+  height: calc(52.42cqw + 24px);
+  border: 0;
+  border-radius: 0.75rem;
+}
+.architecture-viewer-agentes iframe {
+  height: calc(56.46cqw + 24px);
+}
+.architecture-viewer-reserva iframe {
+  height: calc(48.15cqw + 24px);
+}
+.architecture-reading {
+  padding: 1.25rem 0;
+}
+.architecture-reading summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.5rem 0;
+}
+.architecture-reading ol {
+  max-width: 85ch;
+  padding-left: 1.5rem;
+}
+.architecture-reading li {
+  padding: 0.45rem 0 0.45rem 0.5rem;
+}
+.architecture-comparison {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+.architecture-comparison dl {
+  display: grid;
+  gap: 1rem;
+}
+.architecture-comparison dt {
+  font-weight: 700;
+}
+.architecture-comparison dd {
+  margin: 0.5rem 0 0;
+}
+.architecture-footnote {
+  font-size: 0.875rem;
+  max-width: 95ch;
+}
+@media (min-width: 900px) {
+  .architecture-comparison dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .architecture-heading {
+    display: block;
+  }
+  .architecture-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .architecture-actions a {
+    justify-content: center;
+  }
+}

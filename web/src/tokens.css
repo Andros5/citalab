@@ -1,0 +1,129 @@
+/* Tokens semánticos de CitaLab. Paleta inspirada en ClicSalud+ (petróleo #0E7F94,
+   turquesa #1DB3B4, pizarra #47515F, verde #006D55), sin su marca ni logotipos. Los componentes usan roles (superficie, tinta,
+   borde, estado), nunca colores literales, para que el tema oscuro y el claro
+   compartan una sola hoja. index.html fija data-theme en <html> antes de
+   pintar (preferencia guardada o, si no hay, la del sistema). */
+:root {
+  color-scheme: light;
+  --brand: #0e7f94;
+  --brand-dark: #0a6677;
+  --brand-soft: #dff4f5;
+  --brand-ink: #075565;
+  --accent: #0e7f94;
+  --accent-2: #1db3b4;
+  --on-brand: #ffffff;
+
+  --canvas: #f3f7f8;
+  --surface: #ffffff;
+  --surface-2: #f6f9fa;
+  --surface-3: #e9f5f6;
+  --wash: #e9f5f6;
+  --surface-glass: rgb(255 255 255 / 78%);
+
+  --ink: #141c28;
+  --ink-2: #47515f;
+  --muted: #5c6673;
+  --subtle: #8a929c;
+
+  --border: #d9e3e6;
+  --border-subtle: #e8eef0;
+  --border-strong: #9aabb2;
+
+  --success: #006d55;
+  --success-soft: #e6f4ee;
+  --success-border: #c7e6d6;
+  --warn: #9a520c;
+  --warn-soft: #fdf1e4;
+  --warn-border: #f4d3b0;
+  --danger: #b8252e;
+  --danger-soft: #fcecec;
+  --danger-border: #f1c6c8;
+  --info: #3473a9;
+  --info-soft: #edf4fb;
+  --info-border: #c9dbee;
+  --violet: #6a4d8c;
+  --violet-soft: #f7f3fd;
+  --violet-border: #dacfe8;
+
+  --focus: #3473a9;
+  --overlay: rgb(14 22 34 / 50%);
+  --tooltip-bg: #2f3a48;
+  --tooltip-border: #47515f;
+
+  --shadow-sm: 0 1px 2px rgb(20 30 44 / 6%), 0 1px 1px rgb(20 30 44 / 4%);
+  --shadow-md: 0 6px 18px -6px rgb(20 30 44 / 14%), 0 2px 6px rgb(20 30 44 / 5%);
+  --shadow-lg: 0 24px 60px -18px rgb(20 30 44 / 28%), 0 6px 18px rgb(20 30 44 / 7%);
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  --gradient-hero: radial-gradient(1200px 520px at 8% -10%, rgb(14 127 148 / 16%), transparent 60%),
+    radial-gradient(900px 480px at 100% 0%, rgb(29 179 180 / 14%), transparent 55%),
+    radial-gradient(700px 420px at 55% 110%, rgb(0 109 85 / 9%), transparent 60%);
+
+  --font:
+    "Open Sans", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial,
+    sans-serif;
+  --font-display:
+    "Open Sans", "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial,
+    sans-serif;
+  --mono: "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --brand: #3cc4d4;
+  --brand-dark: #6ad6e2;
+  --brand-soft: rgb(60 196 212 / 14%);
+  --brand-ink: #9be6ee;
+  --accent: #3cc4d4;
+  --accent-2: #44d0c9;
+  --on-brand: #02232a;
+
+  --canvas: #0c1418;
+  --surface: #111c21;
+  --surface-2: #15242a;
+  --surface-3: #1a2e35;
+  --wash: #1a2e35;
+  --surface-glass: rgb(17 28 33 / 78%);
+
+  --ink: #e6eef1;
+  --ink-2: #bac8ce;
+  --muted: #93a5ad;
+  --subtle: #6f8189;
+
+  --border: #24363d;
+  --border-subtle: #1c2c32;
+  --border-strong: #40565e;
+
+  --success: #4fd1a5;
+  --success-soft: rgb(95 210 154 / 12%);
+  --success-border: rgb(95 210 154 / 30%);
+  --warn: #f2a35a;
+  --warn-soft: rgb(240 194 106 / 12%);
+  --warn-border: rgb(240 194 106 / 30%);
+  --danger: #f2848a;
+  --danger-soft: rgb(240 138 118 / 12%);
+  --danger-border: rgb(240 138 118 / 30%);
+  --info: #8fbbec;
+  --info-soft: rgb(141 182 242 / 12%);
+  --info-border: rgb(141 182 242 / 30%);
+  --violet: #c3a8ea;
+  --violet-soft: rgb(195 168 234 / 12%);
+  --violet-border: rgb(195 168 234 / 30%);
+
+  --focus: #8fbbec;
+  --overlay: rgb(0 0 0 / 60%);
+  --tooltip-bg: #2a3a44;
+  --tooltip-border: #47515f;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-md: 0 8px 22px -8px rgb(0 0 0 / 55%), 0 2px 6px rgb(0 0 0 / 30%);
+  --shadow-lg: 0 28px 70px -20px rgb(0 0 0 / 70%), 0 6px 18px rgb(0 0 0 / 35%);
+
+  --gradient-hero: radial-gradient(1200px 520px at 8% -10%, rgb(60 196 212 / 16%), transparent 60%),
+    radial-gradient(900px 480px at 100% 0%, rgb(68 208 201 / 12%), transparent 55%),
+    radial-gradient(700px 420px at 55% 110%, rgb(79 209 165 / 8%), transparent 60%);
+}

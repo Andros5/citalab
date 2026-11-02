@@ -1,0 +1,21 @@
+# Entorno y claves locales
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Interfaz
+web/node_modules/
+web/dist/
+
+# Compilación de la memoria
+memoria/build/
+
+# Salidas locales. Solo se versiona la campaña final.
+/output/*
+!/output/evaluation/
+/output/evaluation/*
+!/output/evaluation/final-independent-v1/

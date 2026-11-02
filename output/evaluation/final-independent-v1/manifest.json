@@ -1,0 +1,74 @@
+{
+  "campaign": "final-independent-v1",
+  "created_at": "2026-10-29T20:51:08.504047+00:00",
+  "git_commit": "cbdfe35136101623cc1a959a185d2c94b4c909ef",
+  "git_dirty": false,
+  "prompt_version": "v3.0",
+  "prompt_sha256": "4c41b5b317ef7cf8d6bbe6ea600e29840336894c3241d4c62816b1cc9b6c31e5",
+  "scenarios_path": "data/evaluation/independent-final-v1.json",
+  "scenarios_sha256": "5d9ab7e690f1fb04e14d092713a8d1312b310bd444d50db358030247af661da8",
+  "sources": {
+    "src/citalab/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/citalab/assistant/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/citalab/assistant/engine.py": "9060c585cf2d2a16ab1cef190c30c668d9ca3e44977ad6119d9a84c2c6dfa96f",
+    "src/citalab/assistant/prompts.py": "11bce2b3d42c1ff4629a911284964fd7e53f931295662ac8ec7c31d096834b4a",
+    "src/citalab/assistant/respond.py": "67d1a55ce8009f3f920f80458e7773b29e53aa5a525ef19542b08b4229d448ea",
+    "src/citalab/assistant/schemas.py": "1f95fd447ca73cdfdacdea9ae9c6703c0e9c171b1571cc096661a8d98627a1ec",
+    "src/citalab/assistant/state.py": "3bad1c947a9c021d882957547bcc3f116837b0658b9739411aaaee6291d78551",
+    "src/citalab/assistant/tools.py": "7cd8f78c53e5ea1112f764049f64ee3731f058d0744f0eb969dc11b7d1b91953",
+    "src/citalab/config.py": "2ef95de897f95db337972c13467c75130342c710314cdb6d5084928185b64581",
+    "src/citalab/domain/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/citalab/domain/agenda.py": "889f557c8565ea6181d040821e12095b14494fcb55ea5db0c551a38108b389cb",
+    "src/citalab/domain/policy.py": "865b596cf4b312add2a28b1c5cf89866303257f4d0fbd54d2b6e9c2670eb90b6",
+    "src/citalab/domain/profiles.py": "0dc2878d0a2834dfaa100d130526f4a38486558a59b14cd72cad63a29ee0eb13",
+    "src/citalab/domain/text.py": "3f3be8ff401de3fbc60ad1f305cf3e6c159a2820f95fd754fbbb9c50430a7aa4",
+    "src/citalab/evaluation/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/citalab/evaluation/analysis.py": "a6e71d8aec09e959fdcc2f38de57f5f03d2b02dff8c0281b4f23a5c7a0210e3c",
+    "src/citalab/evaluation/fixtures.py": "c41dd5bcc66089522441558a00e7d2d5427fac7a42abc6e6853d51630201aef9",
+    "src/citalab/evaluation/oracle.py": "b5b071789cb156ff2796aaf76544bc46d6cfb4df6a051be54b738040c5fef3a3",
+    "src/citalab/evaluation/review.py": "1d9c3e81cedf1211d1631dfe5f6c24e37baef065207ed9cafd5b75c31e877170",
+    "src/citalab/evaluation/runner.py": "a42628f334f0d37466210ac100c26b50e8ca086a6187a0b0d12f4925d4202529",
+    "src/citalab/evaluation/simulator.py": "40cd211c4288785d7c980d3f1a87ad6e44063013b9e95f2af4b656dceca6ead0",
+    "src/citalab/llm/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/citalab/llm/client.py": "641d8b0d2fb4bbcca35df2838cea2f19a18c3fedf2114c5b2072004ba7e2e679",
+    "src/citalab/portal/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/citalab/portal/app.py": "9e3a532aa6e5c2f5df7234f5a95ebfc03d6d44bca87f27e9ae76e701c6e91782",
+    "src/citalab/portal/service.py": "e70e9532324441aac7cad982997758a8890306a1421d65971a915b3a6a2a7d74",
+    "src/citalab/portal/storage.py": "1391b6abdaeb7cad1c2db2c18a812e16a08d6af66537bdabba0aa6d45338e5b6",
+    "data/synthetic/profiles/sprint3_profiles.json": "ab0adb071ae1dbb708fe5ab8413977be38c53046394f97a32e953720c1ce4eaa",
+    "scripts/prepare_independent_corpus.py": "7b7d60902431f8a82582d4f64d74f31899f1450ea8e8e72ee9f78350780cb9e2",
+    "scripts/run_independent_campaign.py": "1e40ea501e1d5347934fd906e93416364e466d3a22117ba258c242eb11fa2640"
+  },
+  "families": "",
+  "workers_per_provider": 1,
+  "request_intervals": {
+    "google": 4.5,
+    "groq": 0.0,
+    "simulator": 2.1
+  },
+  "models": {
+    "groq": "openai/gpt-oss-20b",
+    "google": "gemini-3.5-flash-lite"
+  },
+  "simulator_model": "qwen/qwen3.8-27b",
+  "temperature": 0.0,
+  "max_output_tokens": 1200,
+  "max_attempts": 4,
+  "timeout_seconds": 20.0,
+  "blocks": [
+    "primary",
+    "repeat",
+    "counterfactual",
+    "persona",
+    "supplement"
+  ],
+  "providers": [
+    "groq",
+    "google"
+  ],
+  "architectures": [
+    "M5",
+    "S1",
+    "H"
+  ]
+}

@@ -1,0 +1,141 @@
+\chapter{Fundamentos de IA agéntica y personalización conversacional}
+\label{chap:fundamentos}
+
+\section{De los agentes software a los sistemas basados en LLM}
+
+En inteligencia artificial, un agente es un sistema que recibe información
+del entorno y actúa para alcanzar uno o varios objetivos. En la formulación
+clásica, la autonomía, la reacción ante cambios, la iniciativa y la
+comunicación con otros agentes describen propiedades posibles, no requisitos
+que todos los sistemas deban cumplir por igual \citep{wooldridge1995agents}.
+Por tanto, llamar \emph{agente} a un programa no significa que pueda actuar
+sin límites ni que aprenda de manera autónoma.
+
+Un sistema basado en un modelo de lenguaje de gran escala (LLM) añade una
+capacidad de interpretación y generación de lenguaje. El modelo puede
+identificar una intención, resumir el estado de una interacción o proponer una
+acción. Para que esa propuesta tenga un efecto, el sistema necesita estado,
+herramientas y código que controle las operaciones disponibles. El modelo no
+es, por sí solo, el agente completo. El sistema combina sus respuestas con la
+información que recibe, las herramientas disponibles y las reglas que
+comprueban si una acción se puede ejecutar.
+
+Esta diferencia importa en una gestión de citas. Si una persona solicita una
+cita, el modelo puede extraer el servicio, la fecha y la hora. Esa extracción
+no prueba que la agenda tenga un hueco disponible. El sistema debe consultar
+la fuente de agenda, presentar una propuesta y volver a comprobar su estado
+cuando la persona la confirme. La respuesta estructurada ayuda a conectar el
+modelo con el código, pero no demuestra que el contenido sea correcto. Por
+eso, cada salida que pueda afectar a una operación debe comprobarse antes de
+usarla.
+
+\section{Flujos con pasos definidos y autonomía acotada}
+
+Un asistente puede combinar llamadas al LLM con pasos cuya secuencia está
+fijada por el programa. También puede permitir que el modelo elija el próximo
+paso entre varias acciones. Anthropic usa los términos \emph{workflow} para
+los procesos con rutas definidas y \emph{agent} para los que dejan al modelo
+dirigir una parte del recorrido. La propia documentación advierte que estos
+términos no tienen un uso único \citep{anthropicEffectiveAgents}. En esta
+memoria se emplean como categorías de diseño para explicar dónde se decide el
+flujo.
+
+ReAct describe un ciclo en el que el modelo indica el siguiente paso, el
+sistema ejecuta la acción y devuelve el resultado para que el modelo decida
+cómo continuar \citep{yao2023react}. S1 y el coordinador de M5 siguen un ciclo
+de acción y observación similar, aunque sin generar ni conservar razonamientos
+intermedios del modelo. CitaLab mantiene el estado necesario para
+seguir la gestión y registra las operaciones y sus resultados.
+
+El programa limita las acciones que el modelo puede solicitar. Antes de
+ejecutarlas, comprueba los datos y los permisos, y rechaza las que no cumplen
+las condiciones. Para reservar una cita, espera a que la persona confirme una
+propuesta concreta y vuelve a comprobar que el hueco siga libre. El modelo
+puede proponer el paso siguiente, pero el programa decide si lo permite y
+ejecuta cualquier cambio en la agenda.
+
+\section{Agentes especializados y coordinación}
+
+En una arquitectura multiagente, varias responsabilidades se reparten entre
+componentes que colaboran en una tarea. En esta memoria se distingue entre
+modelo, rol, agente lógico, nodo y proceso, porque estos términos no significan
+lo mismo. La Tabla~\ref{tab:conceptos-agentes} fija el uso de cada uno.
+
+\begin{table}[htbp]
+\centering
+\caption{Conceptos usados al describir la arquitectura.}
+\label{tab:conceptos-agentes}
+\small
+\begin{tabularx}{\textwidth}{L{0.2\textwidth}Y}
+\toprule
+\textbf{Concepto} & \textbf{Uso en esta memoria} \\
+\midrule
+Modelo & Componente que recibe una entrada y genera una salida. En una ejecución puede ser compartido por varios roles. \\
+Rol & Responsabilidad delimitada, como extraer contexto o revisar una política. \\
+Agente lógico & Combinación de instrucciones, estado, modelo y contrato de salida asociada a una responsabilidad. \\
+Nodo & Paso que ejecuta el grafo. Puede llamar a un rol, a una herramienta o a lógica determinista. \\
+Proceso & Programa que se ejecuta y aloja una o más partes de la arquitectura. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Esta separación evita contar como agentes separados componentes que solo son
+funciones de código. También evita suponer que cada agente lógico se ejecuta
+como un servicio distinto. Dos roles pueden usar el mismo proveedor de LLM y
+estar dentro de un único proceso. La topología real se describe en el capítulo
+de diseño.
+
+La especialización puede dejar más clara la responsabilidad de cada salida.
+También puede aumentar el número de llamadas, la latencia y el riesgo de que
+un error pase de un componente a otro. La coordinación puede basarse en
+mensajes entre agentes o en un coordinador que comparte estado y distribuye
+tareas. AutoGen es un marco en el que agentes con funciones distintas
+intercambian mensajes para resolver tareas. El marco permite configurar
+esas interacciones \citep{wu2024autogen}. Aquí se cita como ejemplo de
+coordinación por conversación, no como prueba de que añadir agentes mejore los
+resultados.
+
+\citet{kim2026scalingagents} compararon arquitecturas en tareas distintas. La coordinación
+ayudó en algunas que podían dividirse, pero perjudicó las secuenciales. Con un
+presupuesto de cómputo fijo, su coste afectó más a las tareas con muchas
+herramientas. Esto justifica comparar alternativas, pero no permite anticipar
+cuál funcionará mejor en CitaLab.
+
+Este trabajo compara tres diseños. M5 organiza cinco agentes lógicos basados
+en LLM, uno por responsabilidad: contexto, perfiles, cumplimiento,
+personalización y orquestación. S1 concentra la interpretación y la selección
+de acciones en un único agente LLM con acceso equivalente a perfiles,
+herramientas y controles. H fija el flujo en código y usa el LLM para tareas
+acotadas de interpretación y redacción. Las tres variantes comparten el núcleo
+que valida permisos, confirmaciones y operaciones. La evaluación compara los
+resultados y el coste de coordinación.
+
+\section{Personalización conversacional}
+
+La personalización conversacional consiste en adaptar una interacción a las preferencias de la persona y a lo que solicita durante la conversación. En la gestión de citas, puede servir para presentar primero los horarios preferidos, responder en el idioma elegido o ajustar el detalle de una explicación. Estas adaptaciones no cambian las condiciones que debe cumplir la gestión. Una preferencia, por sí sola, tampoco autoriza ninguna operación.
+
+La información utilizada puede proceder de un perfil persistente o de la conversación en curso. El perfil permite conservar preferencias entre sesiones, mientras que el contexto de la sesión recoge las instrucciones y restricciones expresadas para la gestión actual. Si una persona suele preferir citas por la mañana, pero esta vez solicita una por la tarde, debe respetarse la petición de tarde. Del mismo modo, pedir una explicación más detallada en un turno no implica modificar de forma permanente el nivel de detalle guardado. Para conservar un cambio en el perfil hace falta un procedimiento distinto de aplicar una preferencia durante la conversación.
+
+La investigación sobre personalización con LLM ha estudiado tanto la recuperación de información del usuario como su utilización al generar respuestas. La selección de los datos y el método de recuperación influyen en los resultados de la personalización \citep{salemi2024lamp}. Los modelos también presentan dificultades para utilizar correctamente preferencias que evolucionan entre sesiones \citep{jiang2025personamem}. Otros trabajos han evaluado por separado la identificación, el recuerdo y el seguimiento de preferencias en conversaciones con información adicional que puede distraer al modelo \citep{zhao2025prefeval}.
+
+Estos trabajos permiten distinguir entre recuperar una preferencia, determinar si corresponde utilizarla y aplicarla correctamente. Un dato puede seguir disponible en el perfil y, sin embargo, no ser pertinente para la solicitud actual. También puede estar desactualizado o entrar en conflicto con una instrucción más reciente. Por eso, no basta con recuperar el historial: es necesario tener en cuenta el origen, la vigencia y la finalidad de la información, y limitar la consulta a los datos necesarios para la gestión.
+
+En este trabajo, la personalización puede adaptar la respuesta y ordenar alternativas que ya cumplen las condiciones solicitadas. No puede crear huecos disponibles, sustituir un servicio o una fecha sin aceptación ni ejecutar una reserva sin confirmación. La petición expresa, los permisos de acceso y el estado de la agenda siguen siendo condiciones independientes de las preferencias. Los capítulos siguientes concretan qué información utiliza CitaLab, cómo se resuelven los conflictos y qué controles limitan su aplicación.
+
+\section{Entorno regulado y conceptos del trabajo}
+
+Un entorno regulado es un contexto en el que el tratamiento de información y las operaciones realizadas están sujetos a obligaciones que dependen de su finalidad y sus consecuencias. En sanidad, la protección de datos personales y la autonomía del paciente condicionan quién puede acceder a la información y para qué puede utilizarla \citep{es2002autonomia,eu2016gdpr}. Estas restricciones afectan también a los asistentes basados en LLM, especialmente cuando pueden consultar información personal o iniciar operaciones sobre sistemas externos.
+
+Que un sistema utilice IA en sanidad no determina por sí solo su clasificación normativa. No es lo mismo consultar la disponibilidad de una agenda que decidir si una persona puede acceder a una prestación o asignarle prioridad clínica. Las obligaciones dependen del uso previsto y de las funciones que realiza el sistema \citep{eu2024aiact}. CitaLab se limita a la gestión administrativa de citas con datos sintéticos, sin realizar triaje ni tomar decisiones clínicas. El capítulo siguiente analiza las normas que afectan a este alcance.
+
+En una interfaz conversacional, interpretar correctamente una solicitud tampoco significa que pueda ejecutarse. Una persona puede pedir información sobre otra o afirmar que actúa en su nombre, pero la conversación no demuestra por sí sola su identidad ni su autorización. Por ello, el sistema debe comprobar los permisos antes de acceder a los datos o modificar una cita. Las respuestas del LLM pueden ayudar a interpretar la petición, pero no sustituyen estas comprobaciones.
+
+Hay que distinguir entre una propuesta, su confirmación y el resultado de la operación. Una propuesta describe una gestión que todavía no se ha ejecutado. La confirmación expresa que la persona acepta sus condiciones, pero no demuestra que tenga permiso para actuar sobre el paciente. Tampoco equivale al consentimiento para tratar datos personales ni al consentimiento informado para una intervención sanitaria. La operación solo puede considerarse completada cuando se ha ejecutado y se ha comprobado su resultado.
+
+Cuando una petición requiere una decisión clínica, presenta dudas de autorización o queda fuera de las funciones disponibles, el asistente debe evitar resolverla por su cuenta. En CitaLab, estos casos pueden detener la gestión y orientar hacia los canales de atención humana. El prototipo no transfiere la solicitud ni la conversación a un profesional, por lo que la derivación se limita a informar al usuario de cómo continuar fuera del sistema. La evaluación debe comprobar que el asistente respeta estos límites y no ejecuta operaciones para las que carece de autorización.
+
+\section{Definición de trabajo}
+
+En este TFM, la IA agéntica se entiende como un sistema que combina modelos de lenguaje, herramientas y reglas de control para realizar tareas a partir de peticiones en lenguaje natural. El modelo puede interpretar la solicitud y proponer cómo continuar, pero las operaciones se ejecutan mediante el programa, que comprueba los permisos y sus resultados. El grado de autonomía depende de la arquitectura utilizada.
+
+Esta definición permite comparar las tres variantes de CitaLab, aunque organicen las responsabilidades de manera diferente. El objetivo es comprobar si distribuirlas entre agentes especializados mejora la gestión personalizada de citas frente a alternativas más simples, y qué coste añade. Los resultados de la evaluación permiten valorar esas diferencias sin asumir que utilizar más agentes supone una ventaja.

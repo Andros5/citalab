@@ -1,0 +1,26 @@
+% Generado por citalab_judge.agreement (campaña final-independent-v1). No editar a mano.
+\begin{table}[!htbp]\centering\small
+\caption{Concordancia con la revisión humana por dimensión del asistente: kappa ponderada cuadrática de cada juez y sesgo medio del jurado (jurado menos humano).}
+\label{tab:juez-concordancia}
+\begin{tabular}{lrrrrr}\toprule
+Dimensión & n & $\kappa$ Claude & $\kappa$ Codex & $\pm 1$ jurado & Sesgo jurado \\ \midrule
+Administrativa & 60 & 0.73 & 0.59 & 0.98 & -0.12 \\
+Continuidad & 53 & 0.59 & 0.54 & 0.98 & -0.09 \\
+Claridad & 60 & 0.70 & 0.80 & 1.00 & -0.03 \\
+Sin repetición & 60 & 0.71 & 0.59 & 1.00 & -0.07 \\
+Perfil & 60 & 0.64 & 0.51 & 0.98 & -0.20 \\
+Fidelidad & 60 & 0.58 & 0.51 & 0.95 & -0.10 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[!htbp]\centering\small
+\caption{Nota media por configuración estimada con PPI++ (jurado en todos los episodios y muestra humana), con IC95\,\%.}
+\label{tab:juez-ppi}
+\resizebox{\textwidth}{!}{\begin{tabular}{llcccccc}\toprule
+Modelo & Arq. & Administrativa & Continuidad & Claridad & Sin repetición & Perfil & Fidelidad \\ \midrule
+Gemini 3.5 Flash-Lite & H & 2.79 [2.60, 2.98] & 2.84 [2.69, 3.00] & 2.93 [2.87, 2.99] & 2.86 [2.71, 3.01] & 2.77 [2.51, 3.02] & 2.85 [2.69, 3.02] \\
+Gemini 3.5 Flash-Lite & M5 & 2.81 [2.68, 2.94] & 2.82 [2.68, 2.97] & 2.90 [2.79, 3.00] & 2.70 [2.54, 2.86] & 2.82 [2.59, 3.04] & 2.90 [2.72, 3.09] \\
+Gemini 3.5 Flash-Lite & S1 & 2.97 [2.86, 3.07] & 3.00 [3.00, 3.00] & 3.00 [3.00, 3.00] & 3.00 [3.00, 3.00] & 2.56 [2.38, 2.74] & 3.00 [3.00, 3.00] \\
+GPT-OSS 20B & H & 2.68 [2.47, 2.90] & 3.00 [3.00, 3.00] & 2.78 [2.66, 2.91] & 2.84 [2.64, 3.04] & 2.48 [2.25, 2.70] & 2.80 [2.63, 2.98] \\
+GPT-OSS 20B & M5 & 2.39 [2.14, 2.64] & 2.81 [2.66, 2.95] & 2.66 [2.44, 2.87] & 2.56 [2.36, 2.76] & 2.48 [2.23, 2.73] & 2.68 [2.38, 2.97] \\
+GPT-OSS 20B & S1 & 2.45 [2.19, 2.71] & 3.00 [3.00, 3.00] & 2.64 [2.40, 2.88] & 3.00 [3.00, 3.00] & 2.14 [1.96, 2.31] & 2.44 [2.13, 2.74] \\
+\bottomrule\end{tabular}}\end{table}
